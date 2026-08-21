@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard | Stackly Farm</title>
+<meta name="description" content="Manage your CSA box, orders and delivery history with Stackly Farm.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Karla:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+/* ============================================================
+   STACKLY FARM — CUSTOMER DASHBOARD
+   Design system: "Market Ledger" — loam/husk/meadow/marigold
+   ============================================================ */
+:root{
+  --loam:#241B12; --loam-soft:#3B2E1E; --husk:#F5EEDC; --husk-deep:#ECE1C6;
+  --meadow:#4B6043; --meadow-deep:#31402C; --marigold:#D6912B; --marigold-soft:#EBC078;
+  --chicory:#56698A; --line:#DACBA2; --almost-white:#FBF7EC; --white:#FFFFFF;
+  --success:#4B6043; --success-soft:rgba(75,96,67,.12);
+  --warning:#B45309; --warning-soft:rgba(214,145,43,.18);
+  --error:#8C3B2E; --error-soft:rgba(140,59,46,.12);
+  --info:#56698A; --info-soft:rgba(86,105,138,.14);
+  --shadow-lg:0 30px 60px -24px rgba(36,27,18,.28);
+  --shadow-md:0 16px 36px -18px rgba(36,27,18,.2);
+  --shadow-sm:0 8px 20px -10px rgba(36,27,18,.16);
+  --radius:14px; --radius-sm:8px;
+  --display:'Newsreader', serif; --stamp:'Special Elite', monospace; --body:'Karla', sans-serif;
+  --ease:cubic-bezier(.16,.84,.44,1);
+  --sidebar-w:270px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-x:hidden;width:100%;}
+body{font-family:var(--body);background:var(--almost-white);color:var(--loam-soft);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;}
+img{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+h1,h2,h3,h4{font-family:var(--display);font-weight:500;color:var(--loam);letter-spacing:-.01em;line-height:1.2;}
+:focus-visible{outline:2px solid var(--meadow);outline-offset:3px;}
+
+.dash-wrap{display:flex;min-height:100vh;}
+
+/* ---------- Sidebar ---------- */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:0;left:0;height:100vh;background:linear-gradient(180deg,var(--loam) 0%,var(--loam-soft) 100%);color:var(--husk);display:flex;flex-direction:column;z-index:1000;transition:transform .4s var(--ease);}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:26px 22px 20px;border-bottom:1px solid rgba(245,238,220,.1);}
+.sidebar-brand-link{display:flex;align-items:center;gap:2px;flex:1;min-width:0;color:inherit;}
+.brand-logo{width:28px;height:28px;object-fit:contain;flex-shrink:0;}
+.sidebar-brand .brand-word{font-family:var(--display);font-weight:600;font-size:19px;}
+.sidebar-brand .brand-tag{display:block;font-family:var(--stamp);font-weight:400;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--marigold-soft);margin-top:1px;}
+.sidebar-close{display:none;margin-left:auto;width:32px;height:32px;border-radius:8px;background:rgba(245,238,220,.08);align-items:center;justify-content:center;color:var(--husk);}
+
+.sidebar-profile{display:flex;align-items:center;gap:12px;padding:20px 22px;border-bottom:1px solid rgba(245,238,220,.1);}
+.profile-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--meadow),var(--chicory));display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:16px;color:var(--husk);flex-shrink:0;}
+.profile-meta{min-width:0;}
+.profile-name{font-family:var(--display);font-weight:600;font-size:14.5px;color:var(--husk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.profile-email{font-size:11.5px;color:#C9BFA9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.profile-role{display:inline-block;margin-top:6px;font-family:var(--stamp);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--marigold-soft);background:rgba(214,145,43,.16);padding:3px 9px;border-radius:20px;}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:14px 14px;}
+.sidebar-nav .nav-label{font-family:var(--stamp);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7A6E56;padding:12px 10px 8px;}
+.sidebar-nav a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:#DCD3BC;margin-bottom:2px;transition:background .25s,color .25s;position:relative;}
+.sidebar-nav a svg{width:17px;height:17px;flex-shrink:0;color:#8F836A;transition:color .25s;}
+.sidebar-nav a:hover{background:rgba(245,238,220,.06);color:var(--husk);}
+.sidebar-nav a:hover svg{color:var(--marigold-soft);}
+.sidebar-nav a.active{background:linear-gradient(90deg,var(--marigold),rgba(214,145,43,.4));color:var(--loam);font-weight:700;}
+.sidebar-nav a.active svg{color:var(--loam);}
+.nav-badge{margin-left:auto;background:var(--meadow);color:var(--husk);font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;}
+
+.sidebar-bottom{padding:14px 14px 20px;border-top:1px solid rgba(245,238,220,.1);display:flex;flex-direction:column;gap:8px;}
+.sidebar-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;font-size:13px;font-weight:700;transition:all .25s var(--ease);width:100%;}
+.sidebar-btn svg{width:16px;height:16px;flex-shrink:0;}
+.btn-signout{background:rgba(140,59,46,.18);color:#E3B3A6;}
+.btn-signout:hover{background:rgba(140,59,46,.3);color:var(--husk);}
+.btn-home{background:rgba(245,238,220,.06);color:#DCD3BC;}
+.btn-home:hover{background:rgba(245,238,220,.12);color:var(--husk);}
+
+/* ---------- Main ---------- */
+.main{margin-left:var(--sidebar-w);flex:1;min-width:0;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;z-index:150;background:rgba(245,238,220,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:16px 34px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:left .4s var(--ease);}
+.topbar-spacer{width:100%;flex-shrink:0;}
+.topbar-left{display:flex;align-items:center;gap:14px;min-width:0;}
+.hamburger{display:none;width:38px;height:38px;border-radius:8px;background:var(--white);border:1px solid var(--line);align-items:center;justify-content:center;flex-shrink:0;}
+.hamburger svg{width:18px;height:18px;color:var(--loam);}
+.topbar-page{min-width:0;}
+.topbar-crumb{display:block;font-family:var(--stamp);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--meadow-deep);margin-bottom:2px;white-space:nowrap;}
+.topbar-page h1{font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@keyframes wave{0%,100%{transform:rotate(0);}15%{transform:rotate(16deg);}30%{transform:rotate(-8deg);}45%{transform:rotate(12deg);}60%{transform:rotate(0);}}
+
+.topbar-right{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.status-pill{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--meadow-deep);background:var(--success-soft);padding:9px 14px;border-radius:20px;white-space:nowrap;}
+.status-pill .status-dot{width:6px;height:6px;border-radius:50%;background:var(--meadow);box-shadow:0 0 0 3px var(--success-soft);animation:pulseDot 2s ease-in-out infinite;}
+@keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.35;}}
+.topbar-clock{font-family:var(--stamp);font-size:11.5px;color:var(--loam);background:var(--husk-deep);padding:9px 14px;border-radius:20px;white-space:nowrap;}
+.notif-wrap{position:relative;}
+.icon-btn{position:relative;width:38px;height:38px;border-radius:50%;background:var(--white);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .25s,border-color .25s;}
+.icon-btn:hover{background:var(--husk-deep);}
+.icon-btn svg{width:17px;height:17px;color:var(--loam);}
+.notif-dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--chicory);border:2px solid var(--white);}
+.topbar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--meadow),var(--chicory));display:flex;align-items:center;justify-content:center;font-weight:600;font-family:var(--display);font-size:13px;color:var(--husk);flex-shrink:0;cursor:pointer;border:none;}
+
+.notif-panel{position:absolute;top:calc(100% + 12px);right:0;width:298px;max-width:88vw;background:var(--white);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);padding:8px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .25s var(--ease);z-index:200;}
+.notif-panel.show{opacity:1;visibility:visible;transform:translateY(0);}
+.notif-panel-head{padding:10px 12px 8px;font-family:var(--stamp);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--loam);border-bottom:1px solid var(--line);margin-bottom:6px;}
+.notif-item{display:flex;gap:10px;padding:10px 12px;border-radius:8px;}
+.notif-item:hover{background:var(--almost-white);}
+.notif-ic{width:32px;height:32px;border-radius:8px;background:var(--husk-deep);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notif-ic svg{width:16px;height:16px;color:var(--meadow-deep);}
+.notif-text b{display:block;font-size:12.5px;color:var(--loam);font-weight:700;}
+.notif-text span{font-size:11.5px;color:var(--loam-soft);}
+
+.content{padding:26px 34px 60px;flex:1;}
+.view{display:none;}
+.view.active{display:block;animation:fadeUp .5s var(--ease);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+.welcome-band{display:flex;align-items:center;justify-content:space-between;gap:20px;background:linear-gradient(135deg,var(--husk-deep) 0%,var(--almost-white) 100%);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;margin-bottom:24px;flex-wrap:wrap;}
+.welcome-band h2{font-size:27px;line-height:1.15;}
+.welcome-band h2 .accent-name{color:var(--meadow);font-style:italic;}
+.welcome-band h2 .wave{display:inline-block;font-size:.82em;animation:wave 2.4s ease-in-out infinite;transform-origin:70% 70%;}
+.welcome-band p{font-size:13px;color:var(--loam-soft);margin-top:7px;}
+.welcome-band .btn{flex-shrink:0;}
+
+.view-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+.view-head h2{font-size:21px;}
+.view-head p{font-size:12.5px;color:var(--loam-soft);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:6px;font-family:var(--stamp);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;transition:all .3s var(--ease);}
+.btn-primary{background:var(--meadow);color:var(--husk);box-shadow:0 12px 22px -12px rgba(75,96,67,.5);}
+.btn-primary:hover{background:var(--meadow-deep);transform:translateY(-2px);}
+
+/* ---------- Stat cards ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px;width:100%;}
+.stat-card{background:var(--husk);border:1px solid var(--line);border-radius:var(--radius-sm);padding:20px;min-width:0;}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.stat-ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.stat-ic svg{width:18px;height:18px;}
+.stat-trend{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.trend-up{background:var(--success-soft);color:var(--meadow-deep);}
+.trend-down{background:var(--error-soft);color:var(--error);}
+.stat-val{font-family:var(--display);font-weight:600;font-size:26px;color:var(--loam);}
+.stat-label{font-family:var(--stamp);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--meadow-deep);margin-top:4px;}
+
+/* ---------- Chart cards ---------- */
+.chart-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-bottom:18px;width:100%;}
+.chart-card{background:var(--husk);border:1px solid var(--line);border-radius:var(--radius);padding:22px;min-width:0;}
+.chart-card-full{grid-column:1/-1;}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;}
+.chart-head h3{font-size:16px;}
+.chart-head p{font-size:11.5px;color:var(--loam-soft);margin-top:2px;}
+.chart-box{position:relative;height:230px;}
+.chart-box-sm{height:210px;}
+
+/* ---------- Tables ---------- */
+.table-card{background:var(--husk);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead th{text-align:left;font-family:var(--stamp);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--meadow-deep);background:var(--husk-deep);padding:13px 18px;border-bottom:1px solid var(--line);}
+tbody td{padding:14px 18px;font-size:13.5px;color:var(--loam-soft);border-bottom:1px solid var(--line);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--almost-white);}
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--stamp);font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;padding:5px 11px;border-radius:20px;}
+.badge-success{background:var(--success-soft);color:var(--meadow-deep);}
+.badge-warning{background:var(--warning-soft);color:var(--warning);}
+.badge-error{background:var(--error-soft);color:var(--error);}
+.badge-info{background:var(--info-soft);color:var(--chicory);}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.cell-strong{font-weight:700;color:var(--loam);}
+
+/* ---------- CSA box card grid ---------- */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;width:100%;}
+.box-card{background:var(--husk);border:1px solid var(--line);border-radius:var(--radius);padding:20px;min-width:0;}
+.box-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.box-ic{width:44px;height:44px;border-radius:10px;background:var(--success-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.box-ic svg{width:22px;height:22px;color:var(--meadow-deep);}
+.box-name{font-family:var(--display);font-weight:600;font-size:15.5px;color:var(--loam);}
+.box-sub{font-size:11.5px;color:var(--loam-soft);font-family:var(--stamp);margin-top:1px;}
+.box-stats{display:flex;gap:18px;padding-top:12px;border-top:1px solid var(--line);}
+.box-stats div{flex:1;}
+.box-stats b{display:block;font-family:var(--display);font-weight:600;font-size:15.5px;color:var(--loam);}
+.box-stats span{font-size:10.5px;color:var(--loam-soft);}
+
+/* ---------- Produce items list (this week's box) ---------- */
+.produce-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);}
+.produce-row:last-child{border-bottom:none;}
+.produce-name{font-size:14px;font-weight:600;color:var(--loam);}
+.produce-qty{font-size:12.5px;color:var(--loam-soft);}
+
+/* ---------- Settings ---------- */
+.settings-card{background:var(--husk);border:1px solid var(--line);border-radius:var(--radius);padding:26px;max-width:640px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-family:var(--stamp);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--meadow-deep);}
+.field input,.field select{padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;font-size:13.5px;background:var(--white);color:var(--loam);transition:border-color .25s;font-family:var(--body);}
+.field input:focus,.field select:focus{outline:none;border-color:var(--meadow);}
+
+.section-note{font-size:12px;color:var(--loam-soft);background:var(--husk-deep);border:1px dashed var(--line);padding:12px 16px;border-radius:8px;margin-bottom:18px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(36,27,18,.5);z-index:999;}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1280px){ .chart-grid{grid-template-columns:1fr;} }
+@media (max-width: 1180px){ :root{--sidebar-w:246px;} .stat-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width: 900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);box-shadow:0 0 60px rgba(0,0,0,.4);}
+  .sidebar-close{display:flex;}
+  .main{margin-left:0;}
+  .topbar{left:0;}
+  .hamburger{display:flex;}
+  .overlay.show{display:block;}
+  .field-row{grid-template-columns:1fr;}
+  .status-pill{display:none;}
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+}
+@media (max-width: 768px){
+  .topbar{padding:14px 20px;gap:10px;}
+  .content{padding:22px 20px 50px;}
+  .welcome-band{padding:22px;}
+  .welcome-band h2{font-size:23px;}
+  .topbar-clock{display:none;}
+}
+@media (max-width: 560px){
+  .topbar{padding:12px 16px;}
+  .content{padding:18px 16px 44px;}
+  .topbar-crumb{display:none;}
+  .topbar-page h1{font-size:16.5px;}
+  .stat-grid{grid-template-columns:1fr;gap:12px;}
+  .welcome-band{flex-direction:column;align-items:flex-start;padding:20px;border-radius:14px;}
+  .welcome-band h2{font-size:19px;}
+  .view-head{flex-direction:column;align-items:flex-start;}
+  .view-head .btn{width:100%;justify-content:center;}
+  .stat-val{font-size:21px;}
+  .chart-box{height:200px;}
+  .sidebar{width:min(84vw,300px);}
+  table{min-width:520px;}
+  .table-card{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+<div class="dash-wrap">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="index.html" class="sidebar-brand-link">
+        <img src="./stackly-logo.webp" alt="Stackly" class="brand-logo">
+        <div><span class="brand-word">Stackly</span><span class="brand-tag">Member Portal</span></div>
+      </a>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Dashboard navigation">
+      <div class="nav-label">Main</div>
+      <a href="#" data-view="overview" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Overview
+      </a>
+      <a href="#" data-view="orders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        My Orders
+        <span class="nav-badge">2</span>
+      </a>
+      <a href="#" data-view="box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        My CSA Box
+      </a>
+      <a href="#" data-view="deliveries">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13l2-6a2 2 0 012-1h10a2 2 0 012 1l2 6"/><rect x="2" y="13" width="20" height="6" rx="1.5"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+        Deliveries
+      </a>
+      <a href="#" data-view="favorites">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 10-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg>
+        Favorites
+      </a>
+      <div class="nav-label">Account</div>
+      <a href="#" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.04 1.56V21a2 2 0 01-4 0v-.09A1.7 1.7 0 008.44 19.4a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.6 15a1.7 1.7 0 00-1.56-1.04H3a2 2 0 010-4h.09A1.7 1.7 0 004.6 8.6a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 008.6 4.6a1.7 1.7 0 001.04-1.56V3a2 2 0 014 0v.09A1.7 1.7 0 0015.4 4.6a1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 8.6a1.7 1.7 0 001.56 1.04H21a2 2 0 010 4h-.09a1.7 1.7 0 00-1.56 1.04z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-profile">
+      <div class="profile-avatar" id="avatarInitials">S</div>
+      <div class="profile-meta">
+        <div class="profile-name" id="profileName">Stackly Member</div>
+        <div class="profile-email" id="profileEmail">member@example.com</div>
+        <span class="profile-role">Customer</span>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="sidebar-btn btn-home" id="backHomeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Back to Home
+      </button>
+      <button class="sidebar-btn btn-signout" id="signOutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="topbar-page">
+          <span class="topbar-crumb">Dashboard</span>
+          <h1 id="topbarPageTitle">Overview</h1>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="status-pill"><span class="status-dot"></span> Farm Open</span>
+        <span class="topbar-clock" id="topbarClock">--:--:-- --</span>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn" aria-label="Notifications" onclick="error()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="notif-dot"></span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-head">Notifications</div>
+            <div class="notif-item">
+              <div class="notif-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13l2-6a2 2 0 012-1h10a2 2 0 012 1l2 6"/><rect x="2" y="13" width="20" height="6" rx="1.5"/></svg></div>
+              <div class="notif-text"><b>Box out for delivery</b><span>Family Box — arriving today</span></div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+              <div class="notif-text"><b>Next box packs Friday</b><span>Swap window closes Thursday 6pm</span></div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+              <div class="notif-text"><b>Receipt available</b><span>Order #ST-1035 — $89.00</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="topbar-avatar" id="topAvatarInitials" title="Profile" onclick="error()">S</div>
+      </div>
+    </div>
+    <div class="topbar-spacer"></div>
+
+    <div class="content">
+
+      <!-- ===== OVERVIEW ===== -->
+      <section class="view active" data-view="overview">
+        <div class="welcome-band">
+          <div>
+            <h2><span id="greetingWord">Good Morning</span>, <span class="accent-name" id="welcomeName">Stackly Member</span>! <span class="wave">🌾</span></h2>
+            <p>Here's what's happening with your box this week.</p>
+          </div>
+          <a href="./404.html" class="btn btn-primary">View My Box</a>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-top"><div class="stat-ic" style="background:var(--success-soft);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--meadow-deep)" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div><span class="stat-trend trend-up">Active</span></div>
+            <div class="stat-val">Family Box</div>
+            <div class="stat-label">Current Subscription</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><div class="stat-ic" style="background:var(--info-soft);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--chicory)" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></div></div>
+            <div class="stat-val" data-count="14">0</div>
+            <div class="stat-label">Boxes Delivered</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><div class="stat-ic" style="background:var(--warning-soft);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div></div>
+            <div class="stat-val" data-count="756">$0</div>
+            <div class="stat-label">Spent Since 2019</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><div class="stat-ic" style="background:var(--success-soft);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--meadow-deep)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div></div>
+            <div class="stat-val">Fri</div>
+            <div class="stat-label">Next Delivery</div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-head"><div><h3>Your Spend</h3><p>Last 6 months</p></div></div>
+            <div class="chart-box"><canvas id="spendChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head"><div><h3>Box Contents</h3><p>By category, average box</p></div></div>
+            <div class="chart-box chart-box-sm"><canvas id="contentsChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Order</th><th>Item</th><th>Delivered</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="cell-strong">#ST-1035</td><td>Preserving Box</td><td>Aug 12</td><td>$89.00</td><td><span class="badge badge-warning">Processing</span></td></tr>
+              <tr><td class="cell-strong">#ST-1021</td><td>Family Box</td><td>Aug 05</td><td>$54.00</td><td><span class="badge badge-success">Delivered</span></td></tr>
+              <tr><td class="cell-strong">#ST-1008</td><td>Family Box</td><td>Jul 29</td><td>$54.00</td><td><span class="badge badge-success">Delivered</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== MY ORDERS ===== -->
+      <section class="view" data-view="orders">
+        <div class="view-head"><div><h2>My Orders</h2><p>Every box and one-off order you've placed.</p></div><button class="btn btn-primary" onclick="error()">+ New Order</button></div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Order</th><th>Item</th><th>Placed</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="cell-strong">#ST-1035</td><td>Preserving Box</td><td>Aug 12</td><td>$89.00</td><td><span class="badge badge-warning">Processing</span></td></tr>
+              <tr><td class="cell-strong">#ST-1021</td><td>Family Box</td><td>Aug 05</td><td>$54.00</td><td><span class="badge badge-success">Delivered</span></td></tr>
+              <tr><td class="cell-strong">#ST-1008</td><td>Family Box</td><td>Jul 29</td><td>$54.00</td><td><span class="badge badge-success">Delivered</span></td></tr>
+              <tr><td class="cell-strong">#ST-0994</td><td>Family Box</td><td>Jul 22</td><td>$54.00</td><td><span class="badge badge-success">Delivered</span></td></tr>
+              <tr><td class="cell-strong">#ST-0981</td><td>Honey — 2 jars</td><td>Jul 15</td><td>$18.00</td><td><span class="badge badge-error">Cancelled</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== MY CSA BOX ===== -->
+      <section class="view" data-view="box">
+        <div class="view-head"><div><h2>My CSA Box</h2><p>Your current subscription and this week's contents.</p></div></div>
+        <div class="card-grid" style="margin-bottom:22px;">
+          <div class="box-card">
+            <div class="box-top"><div class="box-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div><div><div class="box-name">Family Box</div><div class="box-sub">Weekly · Since 2019</div></div></div>
+            <div class="box-stats"><div><b>$54</b><span>Per Box</span></div><div><b>Fri</b><span>Delivery Day</span></div><div><b>8–10</b><span>Items</span></div></div>
+          </div>
+        </div>
+        <div class="table-card" style="padding:20px 22px;">
+          <h3 style="font-size:16px;margin-bottom:10px;">This Week's Box</h3>
+          <div class="produce-row"><span class="produce-name">Heirloom Tomatoes</span><span class="produce-qty">1 lb</span></div>
+          <div class="produce-row"><span class="produce-name">Rainbow Carrots</span><span class="produce-qty">1 bunch</span></div>
+          <div class="produce-row"><span class="produce-name">Mixed Leafy Greens</span><span class="produce-qty">1 bag</span></div>
+          <div class="produce-row"><span class="produce-name">Free-Range Eggs</span><span class="produce-qty">1 dozen</span></div>
+          <div class="produce-row"><span class="produce-name">Stone Fruit Mix</span><span class="produce-qty">1 box</span></div>
+          <div class="produce-row"><span class="produce-name">Wildflower Honey</span><span class="produce-qty">1 jar</span></div>
+        </div>
+      </section>
+
+      <!-- ===== DELIVERIES ===== -->
+      <section class="view" data-view="deliveries">
+        <div class="view-head"><div><h2>Deliveries</h2><p>Track where your box is on delivery days.</p></div></div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Order</th><th>Item</th><th>Date</th><th>Address</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="cell-strong">#ST-1035</td><td>Preserving Box</td><td>Aug 22</td><td>Anna Nagar</td><td><span class="badge badge-info">In Transit</span></td></tr>
+              <tr><td class="cell-strong">#ST-1021</td><td>Family Box</td><td>Aug 05</td><td>Anna Nagar</td><td><span class="badge badge-success">Delivered</span></td></tr>
+              <tr><td class="cell-strong">#ST-1008</td><td>Family Box</td><td>Jul 29</td><td>Anna Nagar</td><td><span class="badge badge-success">Delivered</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== FAVORITES ===== -->
+      <section class="view" data-view="favorites">
+        <div class="view-head"><div><h2>Favorites</h2><p>Produce you've marked to see more often in your box.</p></div></div>
+        <div class="card-grid">
+          <div class="box-card">
+            <div class="box-top"><div class="box-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C9 6 6 10 6 14a6 6 0 0012 0c0-4-3-8-6-12z"/></svg></div><div><div class="box-name">Heirloom Tomatoes</div><div class="box-sub">$7.50 / box</div></div></div>
+          </div>
+          <div class="box-card">
+            <div class="box-top"><div class="box-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg></div><div><div class="box-name">Wildflower Honey</div><div class="box-sub">$9.00 / jar</div></div></div>
+          </div>
+          <div class="box-card">
+            <div class="box-top"><div class="box-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21c4-1 6-4 6-8V9a2 2 0 012-2h4"/></svg></div><div><div class="box-name">Free-Range Eggs</div><div class="box-sub">$6.75 / dozen</div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section class="view" data-view="settings">
+        <div class="view-head"><div><h2>Account Settings</h2><p>Update the details tied to your membership.</p></div></div>
+        <div class="settings-card">
+          <div class="field-row">
+            <div class="field"><label>Full Name</label><input type="text" id="settingsName" value="Stackly Member"><span class="field-err" data-err-for="settingsName" style="display:block;color:#c0564a;font-size:12px;margin-top:5px;"></span></div>
+            <div class="field"><label>Email</label><input type="email" id="settingsEmail" value="member@example.com"><span class="field-err" data-err-for="settingsEmail" style="display:block;color:#c0564a;font-size:12px;margin-top:5px;"></span></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Phone</label><input type="tel" id="settingsPhone" value="9876543210"><span class="field-err" data-err-for="settingsPhone" style="display:block;color:#c0564a;font-size:12px;margin-top:5px;"></span></div>
+            <div class="field"><label>Delivery Address</label><input type="text" id="settingsAddress" value="Anna Nagar, Chennai"><span class="field-err" data-err-for="settingsAddress" style="display:block;color:#c0564a;font-size:12px;margin-top:5px;"></span></div>
+          </div>
+          <button class="btn btn-primary" id="saveSettingsBtn">Save Changes</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Keep fixed topbar from overlapping content ---------- */
+(function syncTopbarSpacer(){
+  const tb = document.querySelector('.topbar');
+  const sp = document.querySelector('.topbar-spacer');
+  function sync(){ if(tb && sp){ sp.style.height = tb.offsetHeight + 'px'; } }
+  sync();
+  window.addEventListener('resize', sync);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(sync); }
+})();
+
+/* ---------- Restore session user ---------- */
+const stored = JSON.parse(sessionStorage.getItem('stackly_user') || 'null');
+if(stored){
+  const first = (stored.name||'Stackly Member').split(' ')[0];
+  document.getElementById('profileName').textContent = stored.name;
+  document.getElementById('profileEmail').textContent = stored.email;
+  document.getElementById('welcomeName').textContent = first;
+  document.getElementById('avatarInitials').textContent = stored.name.charAt(0).toUpperCase();
+  document.getElementById('topAvatarInitials').textContent = stored.name.charAt(0).toUpperCase();
+  document.getElementById('settingsName').value = stored.name;
+  document.getElementById('settingsEmail').value = stored.email;
+}
+(function greet(){
+  const h=new Date().getHours();
+  document.getElementById('greetingWord').textContent = h<12?'Good Morning':(h<18?'Good Afternoon':'Good Evening');
+})();
+(function clock(){
+  function tick(){
+    document.getElementById('topbarClock').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  tick(); setInterval(tick,1000);
+})();
+
+/* ---------- View switching ---------- */
+const navLinks = document.querySelectorAll('.sidebar-nav a[data-view]');
+const views = document.querySelectorAll('.view[data-view]');
+const viewLabels = {overview:'Overview',orders:'My Orders',box:'My CSA Box',deliveries:'Deliveries',favorites:'Favorites',settings:'Settings'};
+const DASH_VIEW_KEY = 'stacklyFarmUserView';
+function activateView(name, opts){
+  opts=opts||{};
+  navLinks.forEach(l=>l.classList.toggle('active', l.dataset.view===name));
+  views.forEach(v=>v.classList.toggle('active', v.dataset.view===name));
+  document.getElementById('topbarPageTitle').textContent = viewLabels[name] || name;
+  try{ sessionStorage.setItem(DASH_VIEW_KEY, name); }catch(e){}
+  if(opts.scroll) window.scrollTo({top:0,behavior:'smooth'});
+}
+navLinks.forEach(link=>{
+  link.addEventListener('click', function(e){
+    e.preventDefault();
+    activateView(this.dataset.view, {scroll:true});
+    closeSidebar();
+  });
+});
+document.querySelectorAll('[data-view-link]').forEach(el=>{
+  el.addEventListener('click', function(e){ e.preventDefault(); activateView(this.dataset.viewLink, {scroll:true}); });
+});
+try{
+  const savedView = sessionStorage.getItem(DASH_VIEW_KEY);
+  if(savedView && viewLabels[savedView]) activateView(savedView, {scroll:false});
+}catch(e){}
+
+
+
+/* ---------- Mobile sidebar toggle ---------- */
+const sidebar=document.getElementById('sidebar'), overlay=document.getElementById('overlay');
+function openSidebar(){ sidebar.classList.add('open'); overlay.classList.add('show'); }
+function closeSidebar(){ sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
+document.getElementById('sidebarClose').addEventListener('click', closeSidebar);
+overlay.addEventListener('click', closeSidebar);
+
+/* ---------- Sign out / home ---------- */
+document.getElementById('signOutBtn').addEventListener('click', function(){
+  sessionStorage.removeItem('stackly_user');
+  window.location.href='login.html';
+});
+document.getElementById('backHomeBtn').addEventListener('click', function(){ window.location.href='index.html'; });
+/* ---------- Settings form: input restriction + validation ---------- */
+(function(){
+  const NAME_RE=/^[A-Za-z\s]+$/;
+  const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PHONE_RE=/^[6-9]\d{9}$/;
+  const nameEl=document.getElementById('settingsName');
+  const phoneEl=document.getElementById('settingsPhone');
+  if(nameEl) nameEl.addEventListener('input', function(){ this.value=this.value.replace(/[^A-Za-z\s]/g,''); });
+  if(phoneEl) phoneEl.addEventListener('input', function(){ this.value=this.value.replace(/[^0-9]/g,'').slice(0,10); });
+
+  function setErr(id,msg){
+    const el=document.querySelector('[data-err-for="'+id+'"]');
+    if(el) el.textContent=msg||'';
+  }
+
+  document.getElementById('saveSettingsBtn').addEventListener('click', function(){
+    let valid=true;
+    const name=document.getElementById('settingsName').value.trim();
+    const email=document.getElementById('settingsEmail').value.trim();
+    const phone=document.getElementById('settingsPhone').value.trim();
+    const address=document.getElementById('settingsAddress').value.trim();
+
+    if(!name){ setErr('settingsName','Name is required.'); valid=false; }
+    else if(!NAME_RE.test(name)){ setErr('settingsName','Name can only contain letters.'); valid=false; }
+    else { setErr('settingsName',''); }
+
+    if(!EMAIL_RE.test(email)){ setErr('settingsEmail','Enter a valid email address.'); valid=false; }
+    else { setErr('settingsEmail',''); }
+
+    if(!PHONE_RE.test(phone)){ setErr('settingsPhone','Enter a valid 10-digit number.'); valid=false; }
+    else { setErr('settingsPhone',''); }
+
+    if(!address){ setErr('settingsAddress','Delivery address is required.'); valid=false; }
+    else { setErr('settingsAddress',''); }
+
+    if(!valid) return;
+
+    
+    setTimeout(()=>{ window.location.href='./404.html'; },);
+  });
+})();
+
+/* ---------- Animations ---------- */
+if(typeof gsap!=='undefined'){
+  gsap.fromTo('.stat-card', {opacity:0, y:22}, {opacity:1, y:0, duration:.6, stagger:.08, ease:'power3.out'});
+}
+document.querySelectorAll('[data-count]').forEach(el=>{
+  const end = parseInt(el.dataset.count,10);
+  const isMoney = el.textContent.trim().startsWith('$');
+  const obj={val:0};
+  if(typeof gsap!=='undefined'){
+    gsap.to(obj,{val:end, duration:1.4, ease:'power2.out', onUpdate:()=>{ el.textContent=(isMoney?'$':'')+Math.floor(obj.val).toLocaleString(); }});
+  } else { el.textContent=(isMoney?'$':'')+end.toLocaleString(); }
+});
+
+/* ---------- Charts ---------- */
+if (typeof Chart === 'undefined') {
+  document.querySelectorAll('.chart-box').forEach(box=>{
+    box.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--loam-soft);font-size:13px;">Charts couldn\'t load — check your connection and reload.</div>';
+  });
+} else {
+try{
+  const meadow='#4B6043', marigold='#D6912B', chicory='#56698A', loamSoft='#3B2E1E', line='#DACBA2';
+  Chart.defaults.font.family = "'Karla', sans-serif";
+  Chart.defaults.color = loamSoft;
+
+  new Chart(document.getElementById('spendChart'), {
+    type:'line',
+    data:{labels:['Mar','Apr','May','Jun','Jul','Aug'],
+      datasets:[{label:'Spend', data:[108,54,162,108,143,89],
+        borderColor:meadow,
+        backgroundColor:function(ctx){ const g=ctx.chart.ctx.createLinearGradient(0,0,0,220); g.addColorStop(0,'rgba(75,96,67,.28)'); g.addColorStop(1,'rgba(75,96,67,0)'); return g; },
+        fill:true, tension:.4, borderWidth:3, pointRadius:4, pointBackgroundColor:'#fff', pointBorderColor:meadow, pointBorderWidth:2}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{grid:{color:line},ticks:{callback:v=>'$'+v}}, x:{grid:{display:false}}}}
+  });
+
+  new Chart(document.getElementById('contentsChart'), {
+    type:'doughnut',
+    data:{labels:['Vegetables','Fruit','Pantry','Eggs'], datasets:[{data:[46,22,18,14], backgroundColor:[meadow,marigold,chicory,'#B5502E'], borderColor:'#fff', borderWidth:3}]},
+    options:{responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{legend:{position:'bottom', labels:{boxWidth:9,boxHeight:9,usePointStyle:true,pointStyle:'circle',padding:12,font:{size:11,weight:'600'}}}}}
+  });
+} catch(e){ console.error('Chart init failed:', e); }
+}
+})();
+function error(){
+window.location.href="404.html";
+}
+</script>
+</body>
+</html>

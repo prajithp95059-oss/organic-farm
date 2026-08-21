@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In | Stackly Farm</title>
+<meta name="description" content="Sign in to your Stackly Farm account to manage your CSA box, orders and farm history, or create a new one.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Karla:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --loam:#241B12; --loam-soft:#3B2E1E; --husk:#F5EEDC; --husk-deep:#ECE1C6;
+  --meadow:#4B6043; --meadow-deep:#31402C; --marigold:#D6912B; --marigold-soft:#EBC078;
+  --chicory:#56698A; --line:#DACBA2; --white:#FFFFFF;
+  --success:#4B6043; --error:#8C3B2E;
+  --display:'Newsreader', serif; --stamp:'Special Elite', monospace; --body:'Karla', sans-serif;
+  --shadow-lg:0 30px 60px -24px rgba(36,27,18,.32);
+  --shadow-md:0 16px 36px -18px rgba(36,27,18,.24);
+  --ease:cubic-bezier(.16,.84,.44,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{font-family:var(--body);background:var(--husk);color:var(--loam);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input{font-family:inherit;}
+h1,h2{font-family:var(--display);font-weight:500;letter-spacing:-.01em;line-height:1.1;}
+:focus-visible{outline:2px solid var(--meadow);outline-offset:3px;}
+
+#scroll-progress{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--meadow),var(--marigold));z-index:2001;}
+
+.eyebrow{font-family:var(--stamp);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--meadow-deep);display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--marigold);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--stamp);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:15px 22px;border-radius:3px;transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s var(--ease);}
+.btn-primary{background:var(--loam);color:var(--husk);box-shadow:0 14px 28px -14px rgba(36,27,18,.5);}
+.btn-primary:hover{background:var(--meadow-deep);transform:translateY(-2px);}
+.btn-block{width:100%;}
+
+.form-status{margin-top:14px;font-size:13px;font-family:var(--body);padding:12px 15px;border-radius:6px;display:none;}
+.form-status.show{display:block;}
+.form-status.success{background:rgba(75,96,67,.1);color:var(--meadow-deep);border:1px solid rgba(75,96,67,.28);}
+.form-status.error{background:rgba(140,59,46,.08);color:var(--error);border:1px solid rgba(140,59,46,.25);}
+
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--loam);color:var(--husk);padding:14px 24px;border-radius:6px;font-size:13px;font-weight:600;z-index:3000;opacity:0;visibility:hidden;transition:all .4s var(--ease);box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;}
+#toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+#toast svg{width:17px;height:17px;color:var(--marigold-soft);flex-shrink:0;}
+
+/* ===== Split layout ===== */
+.auth-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+.auth-visual{position:relative;overflow:hidden;background:var(--loam);}
+.auth-visual img.bg-photo{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:.5;transform:scale(1.08);}
+.auth-visual-overlay{position:absolute;inset:0;background:linear-gradient(165deg,rgba(36,27,18,.65),rgba(36,27,18,.94));}
+.auth-visual-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:52px;color:var(--husk);}
+
+.brand{display:flex;align-items:center;gap:2px;}
+.brand img{height:32px;}
+.brand .brand-word{font-family:var(--display);font-weight:600;font-size:20px;color:var(--husk);margin-left:8px;}
+
+.auth-visual-copy h2{color:var(--husk);font-size:clamp(28px,3vw,38px);margin:30px 0 16px;max-width:420px;font-style:italic;}
+.auth-visual-copy p{color:var(--husk-deep);font-size:15px;max-width:400px;margin-bottom:30px;opacity:.85;}
+.auth-stats{display:flex;gap:32px;}
+.auth-stats div strong{display:block;font-family:var(--display);font-size:26px;font-weight:600;color:var(--marigold-soft);}
+.auth-stats div span{font-family:var(--stamp);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--husk-deep);opacity:.75;}
+.auth-visual-foot{font-size:12px;color:var(--husk-deep);opacity:.6;}
+
+.auth-panel{display:flex;align-items:center;justify-content:center;padding:60px 40px;position:relative;background:var(--husk);}
+.auth-card{width:100%;max-width:440px;}
+.auth-back{display:inline-flex;align-items:center;gap:8px;font-family:var(--stamp);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--meadow-deep);margin-bottom:26px;}
+.auth-back svg{width:14px;height:14px;}
+.auth-back:hover{color:var(--loam);}
+
+.auth-tabs{display:flex;background:var(--husk-deep);border:1px solid var(--line);border-radius:30px;padding:5px;margin-bottom:30px;position:relative;}
+.auth-tab{flex:1;text-align:center;padding:12px;border-radius:26px;font-family:var(--stamp);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--loam-soft);transition:all .35s var(--ease);z-index:2;position:relative;}
+.auth-tab.active{color:var(--husk);}
+.tab-glider{position:absolute;top:5px;left:5px;width:calc(50% - 5px);height:calc(100% - 10px);background:var(--meadow);border-radius:24px;transition:transform .35s var(--ease);}
+
+.auth-card h1{font-size:30px;margin-bottom:8px;}
+.auth-card > p.auth-sub{color:var(--loam-soft);font-size:14px;margin-bottom:26px;}
+.auth-panel-view{display:none;}
+.auth-panel-view.active{display:block;animation:authFade .5s var(--ease);}
+@keyframes authFade{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+.role-select{display:flex;gap:10px;margin-bottom:20px;}
+.role-pill{flex:1;padding:14px;border:1.5px solid var(--line);border-radius:8px;text-align:center;cursor:pointer;transition:all .3s var(--ease);}
+.role-pill input{display:none;}
+.role-pill .ic{width:32px;height:32px;border-radius:8px;background:var(--husk-deep);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;transition:all .3s var(--ease);}
+.role-pill .ic svg{width:16px;height:16px;color:var(--meadow-deep);}
+.role-pill span{font-size:13px;font-weight:700;color:var(--loam);display:block;}
+.role-pill small{font-size:10.5px;color:var(--loam-soft);}
+.role-pill.selected{border-color:var(--meadow);background:rgba(75,96,67,.08);}
+.role-pill.selected .ic{background:var(--meadow);}
+.role-pill.selected .ic svg{color:var(--husk);}
+
+.field-lg{margin-bottom:18px;}
+.field-lg label{font-family:var(--stamp);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--meadow-deep);margin-bottom:8px;display:block;}
+.input-icon{position:relative;}
+.input-icon svg{position:absolute;left:0;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--loam-soft);}
+.input-icon input{width:100%;padding:11px 32px 11px 26px;background:transparent;border:none;border-bottom:1.5px solid var(--line);font-size:15px;color:var(--loam);transition:border-color .3s;}
+.input-icon input:focus{outline:none;border-color:var(--meadow);}
+.input-icon.error input{border-color:var(--error);}
+.toggle-pass{position:absolute;right:0;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--loam-soft);cursor:pointer;}
+.pass-strength{height:3px;border-radius:3px;background:var(--line);margin-top:9px;overflow:hidden;}
+.pass-strength span{display:block;height:100%;width:0%;background:var(--error);transition:width .35s var(--ease),background .35s var(--ease);}
+.pass-hint{font-size:11px;color:var(--loam-soft);margin-top:6px;}
+.auth-row-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;font-size:13px;}
+.checkbox-row{display:flex;align-items:center;gap:8px;color:var(--loam-soft);}
+.checkbox-row input{accent-color:var(--meadow);}
+.auth-link{color:var(--meadow-deep);font-weight:700;}
+.auth-foot{text-align:center;margin-top:24px;font-size:13.5px;color:var(--loam-soft);}
+.field-err{font-size:11px;color:var(--error);margin-top:6px;min-height:14px;font-family:var(--body);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+
+@media(max-width:980px){.auth-visual{display:none;}.auth-wrap{grid-template-columns:1fr;}}
+@media(max-width:560px){.form-row{grid-template-columns:1fr;}}
+@media(max-width:520px){.auth-panel{padding:110px 20px 60px;}.auth-card h1{font-size:24px;}}
+</style>
+</head>
+<body>
+
+<div id="scroll-progress"></div>
+
+<div class="auth-wrap">
+
+  <div class="auth-visual">
+    <img class="bg-photo" src="./assets/login page.webp" alt="Stackly Farm fields at dawn">
+    <div class="auth-visual-overlay"></div>
+    <div class="auth-visual-content">
+      <a href="index.html" class="brand">
+        <img src="./stackly-logo.webp" alt="Stackly">
+        <span class="brand-word">Stackly</span>
+      </a>
+      <div class="auth-visual-copy">
+        <span class="eyebrow" style="color:var(--marigold-soft);">Grown Slow, Since 1988</span>
+        <h2 data-split>"Everything here still runs the way Margaret started it — slow, honest, worth the wait."</h2>
+        <p>Sign in to manage your CSA box and orders, or join the field to start receiving what's fresh this week.</p>
+        <div class="auth-stats">
+          <div><strong>1,200+</strong><span>CSA Members</span></div>
+          <div><strong>28</strong><span>Acres Farmed</span></div>
+          <div><strong>4.9</strong><span>Member Rating</span></div>
+        </div>
+      </div>
+      <div class="auth-visual-foot">© <span id="year"></span> Stackly Farm. All rights reserved.</div>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <a href="index.html" class="auth-back"><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Back to home</a>
+
+      <div class="auth-tabs">
+        <div class="tab-glider" id="tabGlider"></div>
+        <button class="auth-tab active" data-tab="signin">Sign In</button>
+        <button class="auth-tab" data-tab="signup">Sign Up</button>
+      </div>
+
+      <!-- SIGN IN -->
+      <div class="auth-panel-view active" id="view-signin">
+        <h1>Welcome back</h1>
+        <p class="auth-sub">Log in to manage your CSA box, orders and farm account.</p>
+        <form id="signinForm" novalidate>
+          <label style="font-family:var(--stamp);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--meadow-deep);margin-bottom:10px;display:block;">I am signing in as</label>
+          <div class="role-select">
+            <label class="role-pill selected" data-role="customer">
+              <input type="radio" name="signinRole" value="customer" checked>
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <span>Customer</span><small>Order boxes & track history</small>
+            </label>
+            <label class="role-pill" data-role="admin">
+              <input type="radio" name="signinRole" value="admin">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <span>Farm Admin</span><small>Manage fields & orders</small>
+            </label>
+          </div>
+
+          <div class="field-lg" data-field="siEmail">
+            <label for="siEmail">Email Address</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3z" stroke="currentColor" stroke-width="1.6"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="email" id="siEmail" name="siEmail" placeholder="you@email.com">
+            </div>
+            <span class="field-err"></span>
+          </div>
+
+          <div class="field-lg" data-field="siPass">
+            <label for="siPass">Password</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="password" id="siPass" name="siPass" placeholder="••••••••">
+              <svg class="toggle-pass" data-target="siPass" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <span class="field-err"></span>
+          </div>
+
+          <div class="auth-row-between">
+            <label class="checkbox-row"><input type="checkbox"> Remember me</label>
+            <a href="./404.html" class="auth-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Log In →</button>
+          <div class="form-status" id="signinStatus"></div>
+        </form>
+        <div class="auth-foot">New to Stackly Farm? <a href="#" class="auth-link" data-switch="signup">Create an account</a></div>
+      </div>
+
+      <!-- SIGN UP -->
+      <div class="auth-panel-view" id="view-signup">
+        <h1>Join the field</h1>
+        <p class="auth-sub">Sign up to order boxes and track your farm history.</p>
+        <form id="signupForm" novalidate>
+          <div class="form-row">
+            <div class="field-lg" data-field="suFirst"><label for="suFirst">First Name</label><div class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/></svg><input type="text" id="suFirst" name="suFirst" placeholder="First name"></div><span class="field-err"></span></div>
+            <div class="field-lg" data-field="suLast"><label for="suLast">Last Name</label><div class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/></svg><input type="text" id="suLast" name="suLast" placeholder="Last name"></div><span class="field-err"></span></div>
+          </div>
+
+          <div class="field-lg" data-field="suPhone">
+            <label for="suPhone">Phone Number</label>
+            <div class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.9v3a2 2 0 01-2.2 2A19.8 19.8 0 013 5.2 2 2 0 015 3h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.6a2 2 0 01-.4 2.1L9 10.6a16 16 0 006.4 6.4l1.2-1.2a2 2 0 012.1-.4c.8.3 1.7.5 2.6.6a2 2 0 011.7 2z" stroke="currentColor" stroke-width="1.6"/></svg><input type="tel" id="suPhone" name="suPhone" placeholder="10-digit mobile number"></div>
+            <span class="field-err"></span>
+          </div>
+
+          <div class="field-lg" data-field="suEmail">
+            <label for="suEmail">Email Address</label>
+            <div class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3z" stroke="currentColor" stroke-width="1.6"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="1.6"/></svg><input type="email" id="suEmail" name="suEmail" placeholder="you@email.com"></div>
+            <span class="field-err"></span>
+          </div>
+
+          <label style="font-family:var(--stamp);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--meadow-deep);margin-bottom:10px;display:block;">Account Type</label>
+          <div class="role-select">
+            <label class="role-pill selected" data-role="customer">
+              <input type="radio" name="signupRole" value="customer" checked>
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <span>Customer</span><small>Order boxes & track history</small>
+            </label>
+            <label class="role-pill" data-role="admin">
+              <input type="radio" name="signupRole" value="admin">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <span>Farm Admin</span><small>Manage fields & orders</small>
+            </label>
+          </div>
+
+          <div class="field-lg" data-field="suPass">
+            <label for="suPass">Create Password</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="password" id="suPass" name="suPass" placeholder="Create a password">
+              <svg class="toggle-pass" data-target="suPass" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <div class="pass-strength"><span id="passStrengthBar"></span></div>
+            <div class="pass-hint" id="passHint">Use 8+ characters with a number and a symbol.</div>
+            <span class="field-err"></span>
+          </div>
+
+          <div class="field-lg" data-field="suConfirm">
+            <label for="suConfirm">Confirm Password</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="password" id="suConfirm" name="suConfirm" placeholder="Re-enter your password">
+              <svg class="toggle-pass" data-target="suConfirm" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <span class="field-err"></span>
+          </div>
+
+          <label class="checkbox-row" style="margin-bottom:22px;"><input type="checkbox" id="suTerms"> I agree to the <a href="./404.html" class="auth-link">Terms</a> & <a href="./404.html" class="auth-link">Privacy Policy</a></label>
+
+          <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+          <div class="form-status" id="signupStatus"></div>
+        </form>
+        <div class="auth-foot">Already have an account? <a href="#" class="auth-link" data-switch="signin">Sign in</a></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toastMsg"></span></div>
+
+<script>
+(function(){
+"use strict";
+
+document.getElementById('year').textContent=new Date().getFullYear();
+
+/* ---------- Entrance animation ---------- */
+if(window.gsap){
+  gsap.set('.auth-visual .bg-photo',{scale:1.15});
+  gsap.set('.auth-visual-overlay',{opacity:0});
+  gsap.set('.auth-visual-content > *',{opacity:0,y:24});
+  gsap.set('.auth-card',{x:32,opacity:0});
+  gsap.set('.auth-card > *',{opacity:0,y:16});
+
+  const tl=gsap.timeline({defaults:{ease:'power3.out'}});
+  tl.to('.auth-visual .bg-photo',{scale:1,duration:1.6,ease:'power2.out'},0)
+    .to('.auth-visual-overlay',{opacity:1,duration:1.1},0.05)
+    .to('.auth-visual-content > *',{opacity:1,y:0,duration:.9,stagger:.12},.3)
+    .to('.auth-card',{x:0,opacity:1,duration:.7},.25)
+    .to('.auth-card > *',{opacity:1,y:0,duration:.6,stagger:.06},.45);
+}
+
+const scrollProgress=document.getElementById('scroll-progress');
+document.addEventListener('scroll',()=>{
+  const y=window.scrollY;const h=document.documentElement.scrollHeight-window.innerHeight;
+  if(scrollProgress) scrollProgress.style.width=(h>0?(y/h)*100:0)+'%';
+},{passive:true});
+
+function showToast(msg){
+  const toast=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(window._t);
+  window._t=setTimeout(()=>toast.classList.remove('show'),3200);
+}
+
+/* ---------- Tabs ---------- */
+const tabs=document.querySelectorAll('.auth-tab');
+const glider=document.getElementById('tabGlider');
+const views={signin:document.getElementById('view-signin'),signup:document.getElementById('view-signup')};
+const LOGIN_TAB_KEY='stacklyFarmLoginTab';
+function switchTab(name,opts){
+  opts=opts||{};
+  tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  Object.keys(views).forEach(k=>views[k].classList.toggle('active',k===name));
+  glider.style.transform = name==='signup' ? 'translateX(100%)' : 'translateX(0)';
+  if(!opts.skipSave){ try{ sessionStorage.setItem(LOGIN_TAB_KEY,name); }catch(e){} }
+}
+tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+document.querySelectorAll('[data-switch]').forEach(a=>{
+  a.addEventListener('click',(e)=>{e.preventDefault();switchTab(a.dataset.switch);});
+});
+try{
+  const savedTab=sessionStorage.getItem(LOGIN_TAB_KEY);
+  if(savedTab && views[savedTab]) switchTab(savedTab,{skipSave:true});
+}catch(e){}
+
+/* ---------- Role pills ---------- */
+document.querySelectorAll('.role-select').forEach(group=>{
+  group.addEventListener('click',(e)=>{
+    const pill=e.target.closest('.role-pill');
+    if(!pill)return;
+    group.querySelectorAll('.role-pill').forEach(p=>p.classList.remove('selected'));
+    pill.classList.add('selected');
+    pill.querySelector('input').checked=true;
+  });
+});
+
+/* ---------- Password show/hide ---------- */
+document.querySelectorAll('.toggle-pass').forEach(icon=>{
+  icon.addEventListener('click',()=>{
+    const input=document.getElementById(icon.dataset.target);
+    input.type = input.type==='password' ? 'text' : 'password';
+  });
+});
+
+/* ---------- Password strength ---------- */
+const suPass=document.getElementById('suPass');
+const strengthBar=document.getElementById('passStrengthBar');
+const passHint=document.getElementById('passHint');
+suPass.addEventListener('input',()=>{
+  const v=suPass.value;
+  let score=0;
+  if(v.length>=8)score++;
+  if(/[A-Z]/.test(v)&&/[a-z]/.test(v))score++;
+  if(/\d/.test(v))score++;
+  if(/[^A-Za-z0-9]/.test(v))score++;
+  const pct=(score/4)*100;
+  const colors=['#8C3B2E','#D6912B','#56698A','#4B6043'];
+  strengthBar.style.width=pct+'%';
+  strengthBar.style.background=colors[Math.max(score-1,0)];
+  const labels=['Weak','Fair','Good','Strong'];
+  passHint.textContent = v.length? `Strength: ${labels[Math.max(score-1,0)]}` : 'Use 8+ characters with a number and a symbol.';
+});
+
+/* ---------- Validation helpers ---------- */
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE=/^[6-9]\d{9}$/;
+const NAME_RE=/^[A-Za-z\s]+$/;
+
+/* Live-restrict inputs: names to letters only, phone to digits only */
+['suFirst','suLast'].forEach(function(id){
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input',function(){ this.value=this.value.replace(/[^A-Za-z\s]/g,''); });
+});
+(function(){
+  const el=document.getElementById('suPhone');
+  if(el) el.addEventListener('input',function(){ this.value=this.value.replace(/[^0-9]/g,'').slice(0,10); });
+})();
+function setErr(fieldEl,msg){fieldEl.classList.add('error');const ic=fieldEl.querySelector('.input-icon');if(ic)ic.classList.add('error');const m=fieldEl.querySelector('.field-err');if(m)m.textContent=msg;}
+function clearErr(fieldEl){fieldEl.classList.remove('error');const ic=fieldEl.querySelector('.input-icon');if(ic)ic.classList.remove('error');const m=fieldEl.querySelector('.field-err');if(m)m.textContent='';}
+document.addEventListener('input',(e)=>{const f=e.target.closest('.field-lg');if(f)clearErr(f);});
+
+/* ---------- Sign In submit ---------- */
+const signinForm=document.getElementById('signinForm');
+const signinStatus=document.getElementById('signinStatus');
+signinForm.addEventListener('submit',function(e){
+  e.preventDefault();
+  let valid=true;
+  const emailField=signinForm.querySelector('[data-field="siEmail"]');
+  const passField=signinForm.querySelector('[data-field="siPass"]');
+  clearErr(emailField);clearErr(passField);
+  if(!EMAIL_RE.test(signinForm.siEmail.value.trim())){setErr(emailField,'Enter a valid email address');valid=false;}
+  if(signinForm.siPass.value.length<6){setErr(passField,'Password must be at least 6 characters');valid=false;}
+  if(!valid){signinStatus.textContent='Please fix the highlighted fields to continue.';signinStatus.className='form-status show error';return;}
+  const role=signinForm.querySelector('input[name="signinRole"]:checked').value;
+  const emailVal=signinForm.siEmail.value.trim();
+  signinStatus.textContent=`Signed in successfully as ${role==='admin'?'Farm Admin':'Customer'}. Redirecting...`;
+  signinStatus.className='form-status show success';
+  showToast('Signed in — welcome back to the farm!');
+
+  function nameFromEmail(email){
+    let local=email.split('@')[0]||'';
+    local=local.replace(/[0-9]+/g,' ');
+    local=local.replace(/[._-]+/g,' ').trim();
+    if(!local) return 'Stackly Member';
+    return local.split(/\s+/).filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+  }
+  const sessionUser={name:nameFromEmail(emailVal),email:emailVal,role:role};
+  sessionStorage.setItem('stackly_user',JSON.stringify(sessionUser));
+  // Always land on the Overview tab on a fresh sign-in, never the last-viewed tab
+  try{ sessionStorage.removeItem('stacklyFarmUserView'); sessionStorage.removeItem('stacklyFarmAdminView'); }catch(e){}
+
+  signinForm.reset();
+  setTimeout(()=>{window.location.href = role==='admin' ? 'admin-dashboard.html' : 'user-dashboard.html';},1100);
+});
+
+/* ---------- Sign Up submit ---------- */
+const signupForm=document.getElementById('signupForm');
+const signupStatus=document.getElementById('signupStatus');
+signupForm.addEventListener('submit',function(e){
+  e.preventDefault();
+  let valid=true;
+  const fMap={
+    suFirst:signupForm.querySelector('[data-field="suFirst"]'),
+    suLast:signupForm.querySelector('[data-field="suLast"]'),
+    suPhone:signupForm.querySelector('[data-field="suPhone"]'),
+    suEmail:signupForm.querySelector('[data-field="suEmail"]'),
+    suPass:signupForm.querySelector('[data-field="suPass"]'),
+    suConfirm:signupForm.querySelector('[data-field="suConfirm"]')
+  };
+  Object.values(fMap).forEach(clearErr);
+
+  if(!signupForm.suFirst.value.trim()){setErr(fMap.suFirst,'First name is required');valid=false;}
+  else if(!NAME_RE.test(signupForm.suFirst.value.trim())){setErr(fMap.suFirst,'First name can only contain letters');valid=false;}
+  if(!signupForm.suLast.value.trim()){setErr(fMap.suLast,'Last name is required');valid=false;}
+  else if(!NAME_RE.test(signupForm.suLast.value.trim())){setErr(fMap.suLast,'Last name can only contain letters');valid=false;}
+  if(!PHONE_RE.test(signupForm.suPhone.value.trim())){setErr(fMap.suPhone,'Enter a valid 10-digit number');valid=false;}
+  if(!EMAIL_RE.test(signupForm.suEmail.value.trim())){setErr(fMap.suEmail,'Enter a valid email address');valid=false;}
+  if(signupForm.suPass.value.length<8){setErr(fMap.suPass,'Password must be at least 8 characters');valid=false;}
+  if(signupForm.suConfirm.value!==signupForm.suPass.value || !signupForm.suConfirm.value){setErr(fMap.suConfirm,'Passwords do not match');valid=false;}
+  if(!document.getElementById('suTerms').checked){
+    signupStatus.textContent='Please accept the Terms of Service to continue.';
+    signupStatus.className='form-status show error';
+    valid=false;
+  }
+  if(!valid){
+    if(signupStatus.textContent==='' ) {signupStatus.textContent='Please fix the highlighted fields to continue.';signupStatus.className='form-status show error';}
+    return;
+  }
+  const role=signupForm.querySelector('input[name="signupRole"]:checked').value;
+  signupStatus.textContent=`Account created for ${signupForm.suFirst.value.trim()} as ${role==='admin'?'Farm Admin':'Customer'}. Redirecting to sign in...`;
+  signupStatus.className='form-status show success';
+  showToast('Account created — please sign in');
+  const createdEmail=signupForm.suEmail.value.trim();
+  signupForm.reset();
+  setTimeout(()=>{
+    switchTab('signin');
+    document.getElementById('siEmail').value=createdEmail;
+    signupStatus.className='form-status';
+  },1300);
+});
+})();
+</script>
+</body>
+</html>

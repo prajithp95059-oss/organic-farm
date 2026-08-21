@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Page Not Found | Stackly Farm</title>
+<meta name="description" content="This row of the field is empty — the page you're looking for doesn't exist. Head back to Stackly Farm.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Karla:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --loam:#241B12;
+    --loam-soft:#3B2E1E;
+    --husk:#F5EEDC;
+    --husk-deep:#ECE1C6;
+    --meadow:#4B6043;
+    --meadow-deep:#31402C;
+    --marigold:#D6912B;
+    --marigold-soft:#EBC078;
+    --chicory:#56698A;
+    --line:#DACBA2;
+    --display:'Newsreader', serif;
+    --stamp:'Special Elite', monospace;
+    --body:'Karla', sans-serif;
+    --max:1440px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;overflow-x:hidden;}
+  body{
+    font-family:var(--body);
+    background:var(--husk);
+    color:var(--loam);
+    overflow-x:hidden;
+    max-width:100%;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  img{max-width:100%;display:block;}
+  a{text-decoration:none;color:inherit;}
+  ul{list-style:none;}
+  button{font:inherit;background:none;border:none;cursor:pointer;}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 clamp(24px,4vw,64px);}
+  ::selection{background:var(--marigold);color:var(--loam);}
+
+  .eyebrow{
+    font-family:var(--stamp);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--meadow-deep);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{content:'';width:22px;height:1px;background:var(--marigold);display:inline-block;}
+
+  h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.05;letter-spacing:-.01em;}
+  p{line-height:1.7;color:var(--loam-soft);}
+
+  /* ---------- NAV ---------- */
+  header.site-nav{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    padding:22px 0;
+    background:rgba(245,238,220,.7);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;
+    transition:border-color .4s ease, background .4s ease, padding .4s ease;
+  }
+  .nav-wrap{display:flex;align-items:center;justify-content:space-between;}
+  header.site-nav.scrolled{border-color:var(--line);background:rgba(245,238,220,.92);}
+  .logo{display:flex;align-items:center;gap:8px;}
+  .logo img{height:36px;width:auto;}
+  .logo .logo-word{font-family:var(--display);font-weight:600;font-size:21px;line-height:1;letter-spacing:-.01em;color:var(--loam);white-space:nowrap;}
+  nav.main-links{display:flex;gap:38px;}
+  nav.main-links a{
+    font-size:14.5px;font-weight:600;position:relative;padding:4px 0;
+  }
+  nav.main-links a::after{
+    content:'';position:absolute;left:0;bottom:-2px;width:0;height:1.5px;background:var(--meadow);
+    transition:width .35s ease;
+  }
+  nav.main-links a:hover::after{width:100%;}
+  .nav-cta{display:flex;align-items:center;gap:18px;}
+  .btn{
+    font-family:var(--stamp);
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    padding:13px 26px;border-radius:2px;border:1px solid var(--loam);
+    display:inline-flex;align-items:center;gap:8px;
+    transition:all .3s ease;
+  }
+  .btn-solid{background:var(--meadow);border-color:var(--meadow);color:var(--husk);}
+  .btn-solid:hover{background:var(--meadow-deep);border-color:var(--meadow-deep);}
+  .btn-outline:hover{background:var(--loam);color:var(--husk);}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1100;}
+  .hamburger span{width:26px;height:2px;background:var(--loam);}
+
+  /* mobile menu overlay */
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--husk);z-index:1050;
+    display:flex;flex-direction:column;justify-content:center;padding:80px 40px 60px;
+    transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);
+  }
+  .mobile-menu.open{transform:translateY(0);}
+  .mobile-menu a{font-family:var(--display);font-size:34px;margin-bottom:20px;display:block;}
+  .mobile-menu-close{position:absolute;top:26px;right:26px;width:46px;height:46px;border:1px solid var(--loam);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .25s ease,color .25s ease;}
+  .mobile-menu-close:hover{background:var(--loam);color:var(--husk);}
+  .mobile-menu-close svg{width:17px;height:17px;}
+
+  @media(max-width:1010px){
+    nav.main-links{display:none;}
+    .hamburger{display:flex;}
+  }
+  @media(max-width:520px){
+    header.site-nav{padding:16px 0;}
+  }
+
+  /* ---------- 404 SECTION ---------- */
+  .notfound{
+    flex:1;
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:160px 48px 100px;
+    overflow:hidden;
+  }
+  .notfound::before{
+    content:'';
+    position:absolute;
+    top:50%;left:50%;
+    width:min(900px,140vw);height:min(900px,140vw);
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle, rgba(75,96,67,.08) 0%, rgba(75,96,67,0) 70%);
+    pointer-events:none;
+  }
+  .notfound-inner{
+    position:relative;
+    max-width:640px;
+    text-align:center;
+    margin:0 auto;
+  }
+  .notfound-stamp{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:120px;height:120px;
+    border:1px solid var(--loam);
+    border-radius:50%;
+    margin:0 auto 32px;
+    position:relative;
+  }
+  .notfound-stamp svg{width:52px;height:52px;stroke:var(--meadow);}
+  .notfound-stamp::after{
+    content:'';
+    position:absolute;inset:-8px;
+    border:1px dashed var(--line);
+    border-radius:50%;
+  }
+  .notfound-code{
+    font-family:var(--stamp);
+    font-size:15px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--marigold);
+    margin-bottom:14px;
+  }
+  .notfound h1{
+    font-size:clamp(44px,7vw,84px);
+    margin-bottom:22px;
+  }
+  .notfound h1 em{font-style:italic;color:var(--meadow);}
+  .notfound-sub{
+    font-size:17px;
+    max-width:460px;
+    margin:0 auto 44px;
+  }
+  .notfound-actions{
+    display:flex;
+    gap:16px;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .btn svg{width:15px;height:15px;}
+  .notfound-divider{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    max-width:280px;
+    margin:56px auto 0;
+    font-family:var(--stamp);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--meadow-deep);
+  }
+  .notfound-divider::before,.notfound-divider::after{
+    content:'';flex:1;height:1px;background:var(--line);
+  }
+  .notfound-links{
+    display:flex;
+    gap:26px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:22px;
+  }
+  .notfound-links a{
+    font-size:14px;
+    font-weight:600;
+    position:relative;
+    padding:2px 0;
+    color:var(--loam-soft);
+  }
+  .notfound-links a::after{
+    content:'';position:absolute;left:0;bottom:-2px;width:0;height:1px;background:var(--meadow);
+    transition:width .3s ease;
+  }
+  .notfound-links a:hover{color:var(--loam);}
+  .notfound-links a:hover::after{width:100%;}
+
+  @media(max-width:520px){
+    .notfound{padding:140px 24px 80px;}
+    .notfound-actions{flex-direction:column;width:100%;}
+    .notfound-actions .btn{width:100%;justify-content:center;}
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--loam);color:#C9BFA9;padding:80px 0 30px;}
+  .footer-top{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:50px;padding-bottom:60px;border-bottom:1px solid rgba(245,238,220,.14);}
+  .footer-top .logo img{height:34px;} .footer-top .logo{margin-bottom:16px;}
+  .footer-top p{color:#9C917C;font-size:14px;max-width:280px;}
+  .footer-col h4{font-family:var(--stamp);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--husk);margin-bottom:20px;}
+  .footer-col a{display:block;font-size:14.5px;color:#C9BFA9;margin-bottom:12px;transition:color .25s;}
+  .footer-col a:hover{color:var(--marigold-soft);}
+  .footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:26px;font-size:12.5px;color:#8C816D;flex-wrap:wrap;gap:10px;}
+  footer .logo .logo-word{color:var(--husk);}
+  .social-links{display:flex;gap:14px;margin-top:20px;}
+  .social-icon{width:34px;height:34px;border:1px solid rgba(245,238,220,.22);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s,border-color .25s;}
+  .social-icon svg{width:15px;height:15px;fill:#C9BFA9;}
+  .social-icon:hover{background:var(--meadow);border-color:var(--meadow);}
+
+  @media(max-width:1010px){
+    .footer-top{grid-template-columns:1fr 1fr;row-gap:40px;}
+  }
+  @media(max-width:520px){
+    .footer-top{grid-template-columns:1fr;}
+    .footer-bottom{flex-direction:column;gap:14px;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+
+
+<section class="notfound">
+  <div class="notfound-inner" id="notfoundInner">
+    <div class="notfound-code">Error 404 · Empty Row</div>
+    <h1>This patch of the <em>field</em> is bare.</h1>
+    <p class="notfound-sub">The page you went looking for isn't planted here — it may have been moved, harvested already, or never existed. Let's get you back to solid ground.</p>
+    <div class="notfound-actions">
+      <button type="button" class="btn btn-solid" id="goBackBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        Go Back
+      </button>
+      <a href="index.html" class="btn btn-outline">
+        Back to Home
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+
+
+
+<script>
+// nav scroll state
+const nav = document.getElementById('siteNav');
+window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', window.scrollY > 40));
+
+// mobile menu
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+const mobileMenuClose = document.getElementById('mobileMenuClose');
+hamburger.addEventListener('click', ()=>{
+  mobileMenu.classList.toggle('open');
+});
+mobileMenuClose.addEventListener('click', ()=>mobileMenu.classList.remove('open'));
+mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>mobileMenu.classList.remove('open')));
+
+// "Go Back" — returns the visitor to the exact page/area they came from.
+// history.back() restores the previous document's scroll position natively,
+// which covers the "same area from where the 404 happened" requirement.
+// If there's no history to go back to (e.g. 404 opened directly / new tab),
+// fall back to the home page instead of stranding the visitor.
+const goBackBtn = document.getElementById('goBackBtn');
+goBackBtn.addEventListener('click', ()=>{
+  if(window.history.length > 1){
+    window.history.back();
+  } else {
+    window.location.href = 'index.html';
+  }
+});
+
+// gentle entrance animation for the 404 content
+if(window.gsap){
+  gsap.fromTo('#notfoundInner > *', {opacity:0, y:24}, {opacity:1, y:0, duration:.9, delay:.15, stagger:.1, ease:'power3.out'});
+} else {
+  document.getElementById('notfoundInner').style.opacity = 1;
+}
+</script>
+
+</body>
+</html>

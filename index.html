@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stackly Farm — Organic, Hand-Grown, Honest</title>
+<meta name="description" content="Stackly Farm grows heirloom, organic produce the slow way — no shortcuts, no chemicals, just soil, sun and time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Karla:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root{
+    --loam:#241B12;
+    --loam-soft:#3B2E1E;
+    --husk:#F5EEDC;
+    --husk-deep:#ECE1C6;
+    --meadow:#4B6043;
+    --meadow-deep:#31402C;
+    --marigold:#D6912B;
+    --marigold-soft:#EBC078;
+    --chicory:#56698A;
+    --line:#DACBA2;
+    --display:'Newsreader', serif;
+    --stamp:'Special Elite', monospace;
+    --body:'Karla', sans-serif;
+    --max:1440px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;overflow-x:hidden;}
+  body{
+    font-family:var(--body);
+    background:var(--husk);
+    color:var(--loam);
+    overflow-x:hidden;
+    max-width:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;display:block;}
+  a{text-decoration:none;color:inherit;}
+  ul{list-style:none;}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 clamp(24px,4vw,64px);}
+  ::selection{background:var(--marigold);color:var(--loam);}
+
+  /* ---- FIX 4a: guard every grid/flex container against intrinsic-width
+     overflow, which is the classic cause of a horizontal-scrolling mobile
+     page when a grid child (an image, a long stat, a card) is wider than
+     its track. min-width:0 lets tracks shrink below content size. ---- */
+  .hero-grid, .hero-grid > *,
+  .story-grid, .story-grid > *,
+  .produce-grid, .produce-card,
+  .gallery-grid, .gallery-item,
+  .process-list, .process-item,
+  .numbers-grid, .numbers-item,
+  .footer-top, .footer-col,
+  .blog-grid, .blog-card,
+  .partners-grid, .partners-grid > *,
+  .train-item, .quote-carousel, .quote-slide{
+    min-width:0;
+  }
+
+  .eyebrow{
+    font-family:var(--stamp);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--meadow-deep);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{content:'';width:22px;height:1px;background:var(--marigold);display:inline-block;}
+
+  h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.05;letter-spacing:-.01em;}
+  h2{font-size:clamp(32px,4.2vw,54px);}
+  h2 em{font-style:italic;color:var(--meadow);}
+  p{line-height:1.7;color:var(--loam-soft);}
+
+  /* ---------- NAV ---------- */
+  header.site-nav{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    padding:22px 0;
+    background:rgba(245,238,220,.7);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;
+    transition:border-color .4s ease, background .4s ease, padding .4s ease;
+  }
+  .nav-wrap{display:flex;align-items:center;justify-content:space-between;}
+  header.site-nav.scrolled{border-color:var(--line);background:rgba(245,238,220,.92);}
+  .logo img{height:36px;width:auto;}
+  nav.main-links{display:flex;gap:38px;}
+  nav.main-links a{
+    font-size:14.5px;font-weight:600;position:relative;padding:4px 0;
+  }
+  nav.main-links a::after{
+    content:'';position:absolute;left:0;bottom:-2px;width:0;height:1.5px;background:var(--meadow);
+    transition:width .35s ease;
+  }
+  nav.main-links a:hover::after, nav.main-links a.active::after{width:100%;}
+  .nav-cta{display:flex;align-items:center;gap:18px;}
+  .btn{
+    font-family:var(--stamp);
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    padding:13px 26px;border-radius:2px;border:1px solid var(--loam);
+    display:inline-flex;align-items:center;gap:8px;
+    transition:all .3s ease;
+  }
+  .btn-solid{background:var(--meadow);border-color:var(--meadow);color:var(--husk);}
+  .btn-solid:hover{background:var(--meadow-deep);border-color:var(--meadow-deep);}
+  .btn-outline:hover{background:var(--loam);color:var(--husk);}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1100;}
+  .hamburger span{width:26px;height:2px;background:var(--loam);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+    padding:150px 48px 90px;overflow:hidden;
+    width:100%;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center;
+    max-width:var(--max);margin:0 auto;width:100%;
+  }
+  .hero h1{
+    font-size:clamp(48px,7vw,96px);
+    overflow:hidden;
+  }
+  .hero h1 .line{display:block;overflow:hidden;}
+  .hero h1 .line span{display:inline-block;will-change:transform;}
+  .hero-sub{max-width:440px;margin:28px 0 36px;font-size:18px;}
+  .hero-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+  .hero-scroll{
+    position:absolute;left:48px;bottom:40px;display:flex;align-items:center;gap:12px;
+    font-family:var(--stamp);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--meadow-deep);
+  }
+  .hero-scroll .line-anim{width:1px;height:44px;background:var(--loam);position:relative;overflow:hidden;}
+  .hero-scroll .line-anim::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:var(--marigold);animation:scrollline 2s ease-in-out infinite;}
+  @keyframes scrollline{50%{top:100%;}100%{top:100%;}}
+
+  .hero-visual{position:relative;max-width:440px;margin:0 auto;overflow:visible;}
+  .hero-frame{
+    position:relative;border-radius:6px;overflow:hidden;aspect-ratio:4/5;
+    box-shadow:0 40px 80px -30px rgba(36,27,18,.45);
+  }
+  .hero-frame img{width:100%;height:100%;object-fit:cover;transform:scale(1.15);}
+  .hero-stamp{
+    position:absolute;top:-26px;right:-26px;width:112px;height:112px;
+    background:var(--husk);border:1px solid var(--loam);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-family:var(--stamp);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    animation:spin 22s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* sprout signature svg */
+  .sprout-badge{position:absolute;left:-40px;bottom:-40px;width:130px;height:130px;background:var(--husk);border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;box-shadow:0 20px 40px -20px rgba(36,27,18,.3);}
+  .sprout-badge svg{width:60px;height:60px;}
+  .sprout-badge path{fill:none;stroke:var(--meadow);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* ---------- MARQUEE (text ticker) ---------- */
+  .marquee-strip{background:var(--loam);color:var(--husk);padding:16px 0;overflow:hidden;white-space:nowrap;}
+  .marquee-track{display:inline-flex;gap:48px;animation:mq 26s linear infinite;}
+  .marquee-track span{font-family:var(--stamp);font-size:13px;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;gap:48px;}
+  .marquee-track span::after{content:'✦';color:var(--marigold);}
+  @keyframes mq{to{transform:translateX(-50%);}}
+
+  /* ---------- FIX 4b: "train" strip — organic product photos drifting
+     left→right on a continuous loop, like train cars passing a platform.
+     Built the same safe way as the text marquee above: a track twice the
+     width of one set of cards, animated by exactly one set-width, wrapped
+     in an overflow:hidden section so it can never widen the page. ---- */
+  .train-strip{
+    background:var(--husk-deep);
+    padding:34px 0;
+    overflow:hidden;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    width:100%;
+  }
+  .train-strip .section-head{margin-bottom:30px;padding:0 48px;}
+  .train-track{
+    display:inline-flex;
+    gap:22px;
+    width:max-content;
+    animation:trainMove 42s linear infinite;
+    padding:0 48px;
+  }
+  .train-strip:hover .train-track{animation-play-state:paused;}
+  @keyframes trainMove{ from{ transform:translateX(-50%); } to{ transform:translateX(0%); } }
+  .train-item{
+    position:relative;flex:0 0 auto;width:230px;height:160px;
+    border-radius:6px;overflow:hidden;
+    box-shadow:0 18px 34px -20px rgba(36,27,18,.4);
+  }
+  .train-item img{width:100%;height:100%;object-fit:cover;}
+  .train-item span{
+    position:absolute;left:0;right:0;bottom:0;padding:12px 14px;
+    font-family:var(--stamp);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--husk);
+    background:linear-gradient(to top, rgba(36,27,18,.78), transparent 75%);
+  }
+
+  /* ---------- SECTION GENERIC ---------- */
+  section{padding:130px 0;position:relative;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:64px;}
+  .section-head p{max-width:380px;}
+
+  /* ---------- STORY ---------- */
+  .story{background:var(--husk);}
+  .story-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:70px;align-items:center;}
+  .story-imgs{position:relative;height:520px;}
+  .story-imgs img{position:absolute;border-radius:6px;object-fit:cover;box-shadow:0 30px 60px -25px rgba(36,27,18,.4);}
+  .story-imgs .img-a{width:72%;height:78%;top:0;left:0;z-index:2;}
+  .story-imgs .img-b{width:55%;height:52%;bottom:0;right:0;border:8px solid var(--husk);z-index:3;}
+  .story-copy p{margin-bottom:20px;font-size:16.5px;}
+  .story-stats{display:flex;gap:50px;margin-top:44px;padding-top:36px;border-top:1px solid var(--line);flex-wrap:wrap;}
+  .stat b{font-family:var(--display);font-size:40px;display:block;color:var(--meadow-deep);}
+  .stat span{font-size:13px;color:var(--loam-soft);}
+
+  /* ---------- PRODUCE / IMAGE REVEAL GRID ---------- */
+  .produce{background:var(--husk-deep);}
+  .produce-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .produce-card{position:relative;border-radius:6px;overflow:hidden;aspect-ratio:3/4;cursor:pointer;}
+  .produce-card .reveal-mask{position:absolute;inset:0;background:var(--meadow);z-index:2;transform-origin:bottom;}
+  .produce-card img{width:100%;height:100%;object-fit:cover;transform:scale(1.2);}
+  .produce-info{position:absolute;left:0;right:0;bottom:0;padding:26px;color:var(--husk);z-index:3;
+    background:linear-gradient(to top, rgba(36,27,18,.75), transparent 70%);}
+  .produce-info .tag{font-family:var(--stamp);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:palegoldenrod;}
+  .produce-info h3{font-size:24px;margin-top:6px;}
+
+  /* ---------- PROCESS ---------- */
+  .process{background:var(--loam);color:var(--husk);}
+  .process .eyebrow{color:var(--marigold-soft);}
+  .process .eyebrow::before{background:var(--marigold);}
+  .process h2{color:var(--husk);}
+  .process-list{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(245,238,220,.15);margin-top:20px;}
+  .process-item{background:var(--loam);padding:40px 28px;}
+  .process-item .stamp-num{font-family:var(--stamp);font-size:12px;color:var(--marigold);letter-spacing:.1em;}
+  .process-item h3{font-size:22px;margin:16px 0 10px;color:var(--husk);}
+  .process-item p{color:#C9BFA9;font-size:14.5px;}
+
+  /* ---------- FIELD NOTES / TESTIMONIAL CAROUSEL (FIX 2) ----------
+     3 reviews, one visible at a time, auto-advancing every 3s, each new
+     quote entering from the right and the outgoing quote exiting to the
+     left — a continuous right-to-left swipe. Grid-stacking keeps the
+     track's height equal to its tallest slide with no JS measuring. */
+  .field-note{background:var(--husk);}
+  .quote-carousel{max-width:820px;margin:0 auto;text-align:center;position:relative;}
+  .quote-mark{width:44px;margin:0 auto 24px;stroke:var(--marigold);display:block;}
+  .quote-track{display:grid;}
+  .quote-slide{
+    grid-area:1/1;
+    opacity:0;
+    transform:translateX(100%);
+    transition:transform .7s cubic-bezier(.65,0,.35,1), opacity .5s ease;
+    pointer-events:none;
+  }
+  .quote-slide.is-active{opacity:1;transform:translateX(0);pointer-events:auto;position:relative;z-index:2;}
+  .quote-slide.is-enter{opacity:0;transform:translateX(100%);}
+  .quote-slide.is-exit{opacity:0;transform:translateX(-100%);}
+  .quote-slide.is-instant{transition:none !important;}
+  .quote-slide blockquote{font-family:var(--display);font-style:italic;font-size:clamp(22px,2.8vw,34px);line-height:1.45;color:var(--loam);}
+  .quote-attr{margin-top:26px;font-family:var(--stamp);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--meadow-deep);}
+  .quote-dots{display:flex;justify-content:center;gap:10px;margin-top:44px;}
+  .quote-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--meadow-deep);background:transparent;cursor:pointer;padding:0;transition:background .3s ease,transform .3s ease;}
+  .quote-dot.is-active{background:var(--meadow-deep);transform:scale(1.3);}
+  @media(prefers-reduced-motion:reduce){
+    .quote-slide{transition:opacity .4s ease !important;transform:none !important;}
+  }
+
+  /* ---------- BLOG TEASER ---------- */
+  .blog-teaser{background:var(--husk-deep);}
+  .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;}
+  .blog-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;margin-bottom:20px;}
+  .blog-card .tag{font-family:var(--stamp);font-size:11px;color:var(--meadow);letter-spacing:.08em;text-transform:uppercase;}
+  .blog-card h3{font-size:20px;margin:10px 0;font-weight:500;}
+  .blog-card p{font-size:14.5px;}
+  .blog-card .read-more{margin-top:14px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--meadow-deep);}
+
+  /* ---------- NEWSLETTER (forest green background, dark-on-cream input,
+     marigold CTA — every pairing here sits far apart on the color wheel
+     so nothing gets lost the way the old green-on-green version did) */
+  .newsletter{
+    background:linear-gradient(160deg, #1B3320 0%, #14261A 100%);
+    color:var(--husk);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .newsletter::before{
+    content:'';
+    position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 18% 15%, rgba(75,96,67,.45), transparent 55%),
+      radial-gradient(circle at 84% 85%, rgba(214,145,43,.2), transparent 55%);
+    pointer-events:none;
+  }
+  .newsletter .wrap{position:relative;z-index:1;}
+  .newsletter .eyebrow{color:var(--marigold-soft);}
+  .newsletter .eyebrow::before{background:var(--marigold);}
+  .newsletter h2{color:var(--husk);margin-bottom:14px;}
+  .newsletter h2 em{color:var(--marigold-soft);font-style:italic;}
+  .newsletter p{color:#C9BFA9;max-width:460px;margin:0 auto 34px;}
+  .news-form{
+    display:flex;max-width:460px;margin:0 auto;
+    background:var(--husk);
+    border-radius:6px;
+    padding:6px 6px 6px 22px;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 24px 48px -24px rgba(0,0,0,.55);
+  }
+  .news-form input{
+    flex:1;min-width:0;background:transparent;border:none;
+    color:var(--loam);font-size:15.5px;font-family:var(--body);outline:none;padding:13px 0;
+  }
+  .news-form input::placeholder{color:#8C816D;}
+  .news-form button{
+    background:var(--marigold);border:none;color:var(--loam);
+    font-family:var(--stamp);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    cursor:pointer;padding:14px 22px;border-radius:4px;white-space:nowrap;
+    transition:background .25s ease,transform .25s ease;
+  }
+  .news-form button:hover{background:var(--marigold-soft);transform:translateY(-1px);}
+  @media(max-width:520px){
+    .news-form{flex-direction:column;padding:16px;gap:12px;border-radius:8px;}
+    .news-form input{width:100%;text-align:center;padding:8px 0;}
+    .news-form button{width:100%;}
+  }
+
+  /* ---------- PRELOADER (dark, round ring loader) ---------- */
+  html.is-loading, html.is-loading body{overflow:hidden;height:100%;}
+  .preloader{
+    position:fixed;inset:0;z-index:3000;
+    background:var(--loam);
+    display:flex;align-items:center;justify-content:center;
+    will-change:transform;
+    overflow:hidden;
+  }
+  .preloader::before{
+    content:'';position:absolute;inset:0;
+    background:url('./assets/tractor.webp') center/cover no-repeat;
+    opacity:.16;
+    pointer-events:none;
+  }
+  .preloader::after{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 42%, rgba(75,96,67,.35), transparent 60%),
+      linear-gradient(160deg, rgba(36,27,18,.82), rgba(20,15,10,.94));
+    pointer-events:none;
+  }
+  .preloader-inner{position:relative;z-index:1;text-align:center;}
+  .preloader-ring{width:104px;height:104px;margin:0 auto 26px;position:relative;}
+  .preloader-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .ring-track{fill:none;stroke:rgba(245,238,220,.14);stroke-width:2;}
+  .ring-fill{fill:none;stroke:var(--marigold);stroke-width:2;stroke-linecap:round;
+    stroke-dasharray:213.6;stroke-dashoffset:213.6;transition:stroke-dashoffset .15s linear;}
+  .preloader-ring .ring-mark{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--stamp);font-size:10px;letter-spacing:.06em;color:var(--marigold-soft);
+  }
+  .preloader-word{
+    font-family:var(--display);font-weight:500;
+    font-size:clamp(28px,4vw,38px);color:var(--husk);letter-spacing:-.01em;
+  }
+  .preloader-tag{
+    font-family:var(--stamp);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:#9C917C;margin-top:10px;
+  }
+  @media(prefers-reduced-motion:reduce){
+    .preloader{transition:opacity .4s ease;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .preloader{transition:opacity .4s ease;}
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--loam);color:#C9BFA9;padding:80px 0 30px;}
+  .footer-top{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:50px;padding-bottom:60px;border-bottom:1px solid rgba(245,238,220,.14);}
+  .footer-top .logo img{height:34px;} .footer-top .logo{margin-bottom:16px;}
+  .footer-top p{color:#9C917C;font-size:14px;max-width:280px;}
+  .footer-col h4{font-family:var(--stamp);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--husk);margin-bottom:20px;}
+  .footer-col a{display:block;font-size:14.5px;color:#C9BFA9;margin-bottom:12px;transition:color .25s;}
+  .footer-col a:hover{color:var(--marigold-soft);}
+
+  /* ---- Info column: ul/li list. Plain address lines are not links,
+     so they get their own rule; the Contact Us + email items stay
+     spaced like the other footer columns, and the three address
+     lines are grouped tightly as a single block. ---- */
+  .footer-col ul{margin:0;padding:0;}
+  .footer-col ul li{margin-bottom:12px;font-size:14.5px;color:#C9BFA9;}
+  .footer-col ul li:last-child{margin-bottom:0;}
+  .footer-col ul li a{display:block;margin-bottom:0;}
+  .footer-col ul li.address-line{margin-bottom:4px;}
+  .footer-col ul li.address-line:last-of-type{margin-bottom:12px;}
+
+  .footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:26px;font-size:12.5px;color:#8C816D;flex-wrap:wrap;gap:10px;}
+  .social-links{display:flex;gap:12px;margin-top:22px;}
+  .social-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .25s ease;border:none;background:rgba(245,238,220,.08);flex-shrink:0;}
+  .social-icon:hover{transform:translateY(-3px);background:var(--bg,rgba(245,238,220,.16));}
+  .social-icon svg{width:18px;height:18px;fill:var(--husk);stroke:none;}
+  .social-icon.instagram{--bg:#E1306C;} .social-icon.facebook{--bg:#1877F2;} .social-icon.x{--bg:#000000;}
+  .social-icon.youtube{--bg:#FF0000;} .social-icon.linkedin{--bg:#0A66C2;}
+  .cert-strip{display:flex;justify-content:space-between;flex-wrap:wrap;gap:40px;padding:60px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .cert-item{display:flex;align-items:center;gap:16px;}
+  .cert-item .circle{width:56px;height:56px;border-radius:50%;border:1px solid var(--loam);display:flex;align-items:center;justify-content:center;font-family:var(--stamp);font-size:10px;text-align:center;flex-shrink:0;}
+  .cert-item span{font-size:14px;font-weight:600;max-width:150px;display:block;}
+  @media(max-width:820px){.cert-strip{gap:24px;justify-content:flex-start;}}
+
+
+  /* reveal utility */
+  .reveal-up{opacity:0;transform:translateY(50px);}
+
+  @media(max-width:1010px){
+    .hero-grid{grid-template-columns:1fr;}
+    .story-grid{grid-template-columns:1fr;}
+    .story-imgs{height:400px;margin-top:20px;order:2;}
+    .produce-grid{grid-template-columns:repeat(2,1fr);}
+    .process-list{grid-template-columns:repeat(2,1fr);}
+    .blog-grid{grid-template-columns:1fr;max-width:520px;margin:0 auto;}
+    .footer-top{grid-template-columns:1fr 1fr;row-gap:40px;}
+  }
+  @media(max-width:820px){
+    nav.main-links{display:none;}
+    .hamburger{display:flex;}
+    .nav-cta{display:none !important;}
+    .wrap{padding:0 26px;}
+    .hero{padding:150px 26px 70px;}
+    section{padding:80px 0;}
+    .section-head{flex-direction:column;align-items:flex-start;gap:16px;}
+    .produce-grid{grid-template-columns:1fr;}
+    .story-stats{flex-wrap:wrap;gap:30px;}
+    .sprout-badge{display:none;}
+    .train-strip .section-head{padding:0 26px;}
+    .train-track{padding:0 26px;}
+  }
+  @media(max-width:520px){
+    header.site-nav{padding:16px 0;}
+    .hero h1{font-size:44px;}
+    .hero-actions{flex-direction:column;align-items:flex-start;}
+    .footer-top{grid-template-columns:1fr;}
+    .footer-bottom{flex-direction:column;gap:14px;align-items:flex-start;}
+    .train-item{width:180px;height:130px;}
+    /* FIX 1: center the "38 / 40 / 120+" stats stack on mobile */
+    .story-stats{flex-direction:column;align-items:center;text-align:center;gap:28px;margin-left:auto;margin-right:auto;}
+  }
+
+  /* mobile menu overlay */
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--husk);z-index:1050;
+    display:flex;flex-direction:column;justify-content:center;padding:60px;
+    transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);
+  }
+  .mobile-menu.open{transform:translateY(0);}
+  .mobile-menu a{font-family:var(--display);font-size:34px;margin-bottom:20px;display:block;}
+
+  /* ---------- logo wordmark ---------- */
+  .logo{display:flex;align-items:center;gap:8px;}
+  .logo .logo-word{font-family:var(--display);font-weight:600;font-size:21px;line-height:1;letter-spacing:-.01em;color:var(--loam);white-space:nowrap;}
+  footer .logo .logo-word{color:var(--husk);}
+
+  /* ---------- mobile menu close ---------- */
+  .mobile-menu{padding:80px 40px 60px;}
+  .mobile-menu-close{position:absolute;top:26px;right:26px;width:46px;height:46px;border:1px solid var(--loam);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .25s ease,color .25s ease;}
+  .mobile-menu-close:hover{background:var(--loam);color:var(--husk);}
+  .mobile-menu-close svg{width:17px;height:17px;}
+
+  /* ---------- hero low-opacity backdrop image ---------- */
+  .hero::before{content:'';position:absolute;inset:0;width:100%;height:100%;background:url('./assets/home\ bg.webp') center/cover no-repeat;opacity:.22;z-index:0;pointer-events:none;}
+  .hero-grid{position:relative;z-index:1;}
+  .hero-scroll{z-index:1;}
+
+  @media(max-width:1010px){
+    .hero-visual{max-width:360px;}
+  }
+  @media(max-width:820px){
+    .hero-visual{max-width:300px;}
+    .hero-frame{aspect-ratio:4/4.6;}
+  }
+  @media(max-width:520px){
+    .hero-visual{max-width:230px;}
+    .hero-stamp{width:88px;height:88px;font-size:8.5px;top:-18px;right:-14px;}
+    .sprout-badge{display:none;}
+  }
+
+  /* ---------- partners section ---------- */
+  .partners{background:var(--husk);}
+  .partners-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:70px;align-items:center;}
+  .partners-visual{position:relative;border-radius:6px;overflow:hidden;max-width:420px;box-shadow:0 30px 60px -25px rgba(36,27,18,.4);}
+  .partners-visual img{width:100%;height:auto;display:block;}
+  .partners-copy p{margin-bottom:20px;font-size:16.5px;}
+  .partners-copy .btn{margin-top:6px;}
+  @media(max-width:1010px){
+    .partners-grid{grid-template-columns:1fr;}
+    .partners-visual{max-width:360px;order:2;margin-top:10px;}
+  }
+
+  /* ---------- FIELD GALLERY (FIX 1: two missing images restored) ---------- */
+  .gallery{background:var(--husk-deep);}
+  .gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:160px;gap:20px;}
+  .gallery-item{position:relative;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--line);}
+  .gallery-item:nth-child(1){grid-column:span 2;grid-row:span 2;}
+  .gallery-item:nth-child(4){grid-column:span 2;}
+  .gallery-item:nth-child(5){grid-column:span 2;}
+  .gallery-item:nth-child(6){grid-column:span 1;}
+  .gallery-item:nth-child(7){grid-column:span 1;}
+  .gallery-item img{width:100%;height:100%;object-fit:cover;transform:scale(1.25);transition:transform .6s cubic-bezier(.16,1,.3,1);}
+  .gallery-item:hover img{transform:scale(1.35);}
+  .gallery-item .reveal-mask{position:absolute;inset:0;background:var(--meadow);z-index:2;transform-origin:bottom;}
+  .gallery-item .g-info{position:absolute;left:0;right:0;bottom:0;padding:18px 20px;color:var(--husk);z-index:3;
+    background:linear-gradient(to top, rgba(36,27,18,.7), transparent 65%);
+    opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease;}
+  .gallery-item:hover .g-info{opacity:1;transform:translateY(0);}
+  .gallery-item .g-info span{font-family:var(--stamp);font-size:11px;letter-spacing:.08em;text-transform:uppercase;}
+  @media(max-width:1010px){
+    .gallery-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:180px;}
+    .gallery-item:nth-child(1){grid-column:span 2;grid-row:span 1;}
+    .gallery-item:nth-child(4){grid-column:span 1;}
+    .gallery-item:nth-child(5){grid-column:span 1;}
+    .gallery-item:nth-child(6){grid-column:span 1;}
+    .gallery-item:nth-child(7){grid-column:span 1;}
+  }
+  @media(max-width:520px){
+    .gallery-grid{grid-template-columns:1fr;grid-auto-rows:220px;}
+    .gallery-item:nth-child(1){grid-column:span 1;}
+    .gallery-item:nth-child(4){grid-column:span 1;}
+    .gallery-item:nth-child(5){grid-column:span 1;}
+    .gallery-item:nth-child(6){grid-column:span 1;}
+    .gallery-item:nth-child(7){grid-column:span 1;}
+  }
+
+  /* ---------- BY THE NUMBERS ---------- */
+  .numbers{background:var(--loam);color:var(--husk);}
+  .numbers .eyebrow{color:var(--marigold-soft);}
+  .numbers .eyebrow::before{background:var(--marigold);}
+  .numbers h2{color:var(--husk);}
+  .numbers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(245,238,220,.15);margin-top:40px;}
+  .numbers-item{background:var(--loam);padding:44px 30px;text-align:center;}
+  .numbers-item b{font-family:var(--display);font-size:48px;display:block;color:var(--marigold-soft);}
+  .numbers-item span{font-size:13px;color:#C9BFA9;display:block;margin-top:10px;}
+  @media(max-width:820px){.numbers-grid{grid-template-columns:repeat(2,1fr);}}
+  /* FIX: this rule must come after the 820px one above so it actually wins
+     at narrow widths — same selector/specificity, source order decides */
+  @media(max-width:520px){
+    .numbers-grid{grid-template-columns:1fr;}
+    .numbers-item{padding:36px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader-inner">
+    <div class="preloader-ring">
+      <svg viewBox="0 0 80 80">
+        <circle class="ring-track" cx="40" cy="40" r="34"/>
+        <circle class="ring-fill" id="ringFill" cx="40" cy="40" r="34"/>
+      </svg>
+      <div class="ring-mark" id="ringPct">0%</div>
+    </div>
+    <div class="preloader-word">Stackly</div>
+    <div class="preloader-tag">Soil to Table</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const preloader = document.getElementById('preloader');
+  if(!preloader) return;
+  document.documentElement.classList.add('is-loading');
+
+  const ringFill = document.getElementById('ringFill');
+  const ringPct = document.getElementById('ringPct');
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const CIRCUMFERENCE = 213.6; // 2 * PI * r(34)
+
+  function paint(p){
+    ringFill.style.strokeDashoffset = CIRCUMFERENCE * (1 - p / 100);
+    ringPct.textContent = Math.round(p) + '%';
+  }
+
+  let progress = 0;
+  const ticker = setInterval(function(){
+    // eases toward 90% on its own; the last stretch only completes once the page has actually loaded
+    progress += (90 - progress) * 0.06 + 0.4;
+    if(progress > 90) progress = 90;
+    paint(progress);
+  }, 90);
+
+  function finish(){
+    clearInterval(ticker);
+    paint(100);
+
+    const done = function(){
+      preloader.style.display = 'none';
+      document.documentElement.classList.remove('is-loading');
+    };
+    if(reduceMotion || typeof gsap === 'undefined'){
+      preloader.style.transition = 'opacity .5s ease';
+      setTimeout(function(){ preloader.style.opacity = '0'; }, 200);
+      setTimeout(done, 700);
+    } else {
+      gsap.to(preloader, {
+        delay: .35,
+        yPercent: -100,
+        duration: 1,
+        ease: 'power4.inOut',
+        onComplete: done
+      });
+    }
+  }
+
+  if(document.readyState === 'complete'){
+    setTimeout(finish, 450);
+  } else {
+    window.addEventListener('load', function(){ setTimeout(finish, 350); });
+  }
+})();
+</script>
+
+<header class="site-nav" id="siteNav">
+  <div class="wrap nav-wrap">
+  <a href="index.html" class="logo"><img src="./stackly-logo.webp" alt="Stackly"><span class="logo-word">Stackly</span></a>
+  <nav class="main-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Services</a>
+    <a href="products.html">Products</a>
+    <a href="blog.html">Journal</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-cta">
+    <a href="login.html" class="btn btn-outline">Log In</a>
+  </div>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></div>
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="services.html">Services</a>
+  <a href="products.html">Products</a>
+  <a href="blog.html">Journal</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html">Log In</a>
+</div>
+
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">Field Report — Willowmere Valley</div>
+      <h1>
+        <span class="line"><span>Grown slow.</span></span>
+        <span class="line"><span>Picked ripe.</span></span>
+        <span class="line"><span><em style="font-style:italic;color:var(--meadow);">Never rushed.</em></span></span>
+      </h1>
+      <p class="hero-sub">Stackly Farm is forty acres of heirloom vegetables, pastured hens and orchard fruit, grown without a single synthetic input — the way our valley has farmed for three generations.</p>
+      <div class="hero-actions">
+        <a href="./404.html" class="btn btn-solid">Shop This Week's Harvest</a>
+        <a href="./404.html" class="btn btn-outline">Our Story →</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-frame">
+        <img src="./assets/floating img.webp" alt="Rows of organic vegetables at Stackly Farm">
+      </div>
+      <div class="hero-stamp">EST. 1988 · SOIL TO TABLE</div>
+      <div class="sprout-badge">
+        <svg viewBox="0 0 100 100" id="sproutSvg">
+          <path id="sproutPath" d="M50 90 L50 45 C50 45 30 45 30 25 C30 10 50 10 50 10 C50 10 70 10 70 25 C70 45 50 45 50 45" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="marquee-strip">
+  <div class="marquee-track" id="marqueeTrack">
+    <span>Certified Organic<span>No Synthetic Pesticides</span><span>Regenerative Soil</span><span>Family Owned Since 1988</span><span>Pasture Raised</span></span>
+    <span>Certified Organic<span>No Synthetic Pesticides</span><span>Regenerative Soil</span><span>Family Owned Since 1988</span><span>Pasture Raised</span></span>
+  </div>
+</div>
+
+<section class="story">
+  <div class="wrap">
+    <div class="story-grid">
+      <div class="story-imgs">
+        <img class="img-a reveal-up" src="./assets/our story 1.webp" alt="Farmer inspecting heirloom tomatoes">
+        <img class="img-b reveal-up" src="./assets/our story 2.webp" alt="Freshly harvested carrots">
+      </div>
+      <div class="story-copy">
+        <div class="eyebrow">Our Story</div>
+        <h2 class="reveal-up">Three generations, <em>one plot of soil</em></h2>
+        <p class="reveal-up">Stackly Farm began in 1988 when Margaret Stackly turned four acres of tired pastureland into a kitchen garden that fed half the county. Today her grandchildren farm the same forty acres — still without chemical fertilizer, still rotating crops by hand-drawn maps she left behind.</p>
+        <p class="reveal-up">We measure success in earthworm counts, not yield reports. A slower method, but it's the only one that leaves the land better than we found it.</p>
+        <div class="story-stats">
+          <div class="stat"><b>38</b><span>Years Farming Organic</span></div>
+          <div class="stat"><b>40</b><span>Acres Under Cultivation</span></div>
+          <div class="stat"><b>120+</b><span>Heirloom Varieties Grown</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="produce">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">This Week's Harvest</div>
+        <h2>What's coming <em>out of the ground</em></h2>
+      </div>
+      <p>A living list — what you see below was picked within the last 48 hours and is available for pre-order today.</p>
+    </div>
+    <div class="produce-grid">
+      <div class="produce-card">
+        <div class="reveal-mask"></div>
+        <img src="./assets/wild tomatoes.webp" alt="Heirloom tomatoes">
+        <div class="produce-info"><span class="tag">Vegetable</span><h3>Heirloom Tomatoes</h3></div>
+      </div>
+      <div class="produce-card">
+        <div class="reveal-mask"></div>
+        <img src="./assets/rainbow carrot.webp" alt="Bundled root vegetables">
+        <div class="produce-info"><span class="tag">Root Crop</span><h3>Rainbow Carrots</h3></div>
+      </div>
+      <div class="produce-card">
+        <div class="reveal-mask"></div>
+        <img src="./assets/eggs.webp" alt="Farm fresh eggs in a basket">
+        <div class="produce-info"><span class="tag">Pasture</span><h3>Free-Range Eggs</h3></div>
+      </div>
+      <div class="produce-card">
+        <div class="reveal-mask"></div>
+        <img src="./assets/salad.webp" alt="Fresh leafy greens">
+        <div class="produce-info"><span class="tag">Greens</span><h3>Salad Mix</h3></div>
+      </div>
+      <div class="produce-card">
+        <div class="reveal-mask"></div>
+        <img src="./assets/stone fruit.webp" alt="Basket of orchard fruit">
+        <div class="produce-info"><span class="tag">Orchard</span><h3>Stone Fruit</h3></div>
+      </div>
+      <div class="produce-card">
+        <div class="reveal-mask"></div>
+        <img src="./assets/honey.webp" alt="Raw honeycomb">
+        <div class="produce-info"><span class="tag">Apiary</span><h3>Wildflower Honey</h3></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Around The Farm</div>
+        <h2>A season, <em>in pictures</em></h2>
+      </div>
+      <p>Straight from the field — no styling, no filters. Just what a working week at Stackly Farm actually looks like.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item reveal-up">
+        <div class="reveal-mask"></div>
+        <img src="./assets/sunrise.webp" alt="Rows of crops at sunrise">
+        <div class="g-info"><span>Sunrise Rows</span></div>
+      </div>
+      <div class="gallery-item reveal-up">
+        <div class="reveal-mask"></div>
+        <img src="./assets/morning checks.webp" alt="Farmer inspecting tomatoes">
+        <div class="g-info"><span>Morning Check</span></div>
+      </div>
+      <div class="gallery-item reveal-up">
+        <div class="reveal-mask"></div>
+        <img src="./assets/fresh pick.webp" alt="Freshly harvested carrots">
+        <div class="g-info"><span>Fresh Pull</span></div>
+      </div>
+      <div class="gallery-item reveal-up">
+        <div class="reveal-mask"></div>
+        <img src="./assets/green house.webp" alt="Seedling trays in the greenhouse">
+        <div class="g-info"><span>Greenhouse</span></div>
+      </div>
+      <div class="gallery-item reveal-up">
+        <div class="reveal-mask"></div>
+        <img src="./assets/long table dinner.webp" alt="Long outdoor farm-to-table dinner setup">
+        <div class="g-info"><span>Long-Table Dinner</span></div>
+      </div>
+      <div class="gallery-item reveal-up">
+        <div class="reveal-mask"></div>
+        <img src="./assets/morning check2.webp" alt="Farmer inspecting tomatoes closely">
+        <div class="g-info"><span>Morning Check</span></div>
+      </div>
+      <div class="gallery-item reveal-up">
+        <div class="reveal-mask"></div>
+        <img src="./assets/fresh pick 2.webp" alt="Rows of freshly harvested carrots">
+        <div class="g-info"><span>Fresh Pull</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="process">
+  <div class="wrap">
+    <div class="eyebrow">How We Farm</div>
+    <h2>From seed to <em style="color:var(--marigold-soft)">your basket</em></h2>
+    <div class="process-list">
+      <div class="process-item reveal-up"><div class="stamp-num">Sown</div><h3>Seed Saving</h3><p>Every variety is open-pollinated and re-seeded from our own harvest each season.</p></div>
+      <div class="process-item reveal-up"><div class="stamp-num">Tended</div><h3>No-Till Beds</h3><p>Compost, cover crops and hand-weeding — never a synthetic input touches this soil.</p></div>
+      <div class="process-item reveal-up"><div class="stamp-num">Picked</div><h3>Hand Harvested</h3><p>Every crate is picked at peak ripeness the same morning it ships or sells.</p></div>
+      <div class="process-item reveal-up"><div class="stamp-num">Delivered</div><h3>Direct to You</h3><p>Farm stand, weekly boxes, or wholesale — no distributor sits between us and you.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="partners">
+  <div class="wrap">
+    <div class="partners-grid">
+      <div class="partners-visual reveal-up">
+        <img src="./assets/tractor.webp" alt="Two farm partners shaking hands in a wheat field at Stackly Farm">
+      </div>
+      <div class="partners-copy">
+        <div class="eyebrow">Who We Grow With</div>
+        <h2 class="reveal-up">Built on <em>handshake agreements</em></h2>
+        <p class="reveal-up">Every co-op, mill and market stall we work with started the same way — a walk through the field and a handshake, not a contract. Thirty-eight years in, most of those partnerships are still standing on nothing more than that.</p>
+        <p class="reveal-up">From the grain co-op that mills our wheat to the seed-savers who trade heirloom varieties with us each spring, Stackly Farm grows inside a small, trusted circle — and we're always looking to widen it the same honest way.</p>
+        <a href="./404.html" class="btn btn-outline reveal-up">Partner With Us →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="numbers">
+  <div class="wrap">
+    <div class="eyebrow">Stackly Farm, By The Numbers</div>
+    <h2>Small farm, <em style="color:var(--marigold-soft);">honest scale</em></h2>
+    <div class="numbers-grid">
+      <div class="numbers-item reveal-up"><b>38</b><span>Years Farming Organic</span></div>
+      <div class="numbers-item reveal-up"><b>40</b><span>Acres Under Cultivation</span></div>
+      <div class="numbers-item reveal-up"><b>120+</b><span>Heirloom Varieties Grown</span></div>
+      <div class="numbers-item reveal-up"><b>1,200+</b><span>CSA Members Served</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- "Rolling Harvest" train strip — organic product photos drifting left→right on loop -->
+<section class="train-strip">
+  <div class="section-head" style="margin-bottom:30px;">
+    <div>
+      <div class="eyebrow">Rolling Harvest</div>
+      <h2 style="font-size:clamp(24px,3vw,34px);">What's riding <em>this week's crate</em></h2>
+    </div>
+  </div>
+  <div class="train-track" id="trainTrack">
+    <div class="train-item"><img src="./assets/Heirloom tomatoes on the vine.webp" alt="Heirloom tomatoes on the vine"><span>Heirloom Tomatoes</span></div>
+    <div class="train-item"><img src="./assets/Bundle of rainbow carrots.webp" alt="Bundle of rainbow carrots"><span>Rainbow Carrots</span></div>
+    <div class="train-item"><img src="./assets/Basket of free-range eggs.webp" alt="Basket of free-range eggs"><span>Free-Range Eggs</span></div>
+    <div class="train-item"><img src="./assets/Fresh leafy salad greens.webp" alt="Fresh leafy salad greens"><span>Salad Mix</span></div>
+    <div class="train-item"><img src="./assets/Basket of orchard stone fruit.webp" alt="Basket of orchard stone fruit"><span>Stone Fruit</span></div>
+    <div class="train-item"><img src="./assets/Raw wildflower honeycomb.webp" alt="Raw wildflower honeycomb"><span>Wildflower Honey</span></div>
+    <div class="train-item"><img src="./assets/Freshly pulled garden carrots.webp" alt="Freshly pulled garden carrots"><span>Fresh Pull Roots</span></div>
+    <div class="train-item"><img src="./assets/Seedling trays in the greenhouse.webp" alt="Seedling trays in the greenhouse"><span>Greenhouse Starts</span></div>
+    <!-- duplicate set for a seamless loop -->
+    <div class="train-item" aria-hidden="true"><img src="./assets/wild tomatoes.webp" alt=""><span>Heirloom Tomatoes</span></div>
+    <div class="train-item" aria-hidden="true"><img src="./assets/rainbow carrot.webp" alt=""><span>Rainbow Carrots</span></div>
+    <div class="train-item" aria-hidden="true"><img src="./assets/eggs.webp" alt=""><span>Free-Range Eggs</span></div>
+    <div class="train-item" aria-hidden="true"><img src="./assets/salad.webp" alt=""><span>Salad Mix</span></div>
+    <div class="train-item" aria-hidden="true"><img src="./assets/stone fruit.webp" alt=""><span>Stone Fruit</span></div>
+    <div class="train-item" aria-hidden="true"><img src="./assets/honey.webp" alt=""><span>Wildflower Honey</span></div>
+    <div class="train-item" aria-hidden="true"><img src="./assets/fresh pick.webp" alt=""><span>Fresh Pull Roots</span></div>
+    <div class="train-item" aria-hidden="true"><img src="./assets/green house.webp" alt=""><span>Greenhouse Starts</span></div>
+  </div>
+</section>
+
+<!-- FIX 2: testimonial carousel — 3 reviews, auto-advance every 3s, right→left swipe -->
+<section class="field-note">
+  <div class="wrap">
+    <div class="quote-carousel" id="quoteCarousel">
+      <svg class="quote-mark" viewBox="0 0 24 24" fill="none"><path d="M7 9C7 6 9 4 12 4M7 9C4 9 3 11 3 14C3 17 5 19 8 19C11 19 12 16 12 14C12 11 10 9 7 9ZM19 9C19 6 21 4 24 4M19 9C16 9 15 11 15 14C15 17 17 19 20 19C23 19 24 16 24 14C24 11 22 9 19 9Z" stroke-width="1.5"/></svg>
+      <div class="quote-track">
+        <div class="quote-slide is-active">
+          <blockquote>We've bought our vegetable box from Stackly for six years. You can taste the difference three generations of care makes — this isn't marketing, it's just how good real food tastes.</blockquote>
+          <div class="quote-attr">— Priya Menon, CSA Member Since 2019</div>
+        </div>
+        <div class="quote-slide is-enter">
+          <blockquote>Our kids used to turn their noses up at vegetables until we started getting the weekly box. Turns out they just hadn't had a carrot that was pulled from the ground that morning.</blockquote>
+          <div class="quote-attr">— Daniel Osei, Weekly Box Subscriber</div>
+        </div>
+        <div class="quote-slide is-enter">
+          <blockquote>We drive forty minutes each way for the Saturday farm stand, and every time it's worth it. Nowhere else can you ask the person who grew your tomatoes how they grew them.</blockquote>
+          <div class="quote-attr">— The Whitfield Family, CSA Members Since 2021</div>
+        </div>
+      </div>
+      <div class="quote-dots">
+        <button class="quote-dot is-active" data-i="0" aria-label="Show review 1"></button>
+        <button class="quote-dot" data-i="1" aria-label="Show review 2"></button>
+        <button class="quote-dot" data-i="2" aria-label="Show review 3"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blog-teaser">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">The Field Journal</div>
+        <h2>Notes from <em>the greenhouse</em></h2>
+      </div>
+      <a href="./404.html" class="btn btn-outline">Read the Journal →</a>
+    </div>
+    <div class="blog-grid">
+      <a class="blog-card" href="./404.html">
+        <img src="./assets/soil.webp" alt="Sunrise over the fields">
+        <span class="tag">Field Notes</span>
+        <h3>What Cover Crops Taught Us About Soil</h3>
+        <p>Three seasons of clover and rye later, our soil tests tell a story we didn't expect.</p>
+        <span class="read-more">Read the Field Note →</span>
+      </a>
+      <a class="blog-card" href="./404.html">
+        <img src="./assets/veges.webp" alt="Seedlings in the greenhouse">
+        <span class="tag">Growing Guide</span>
+        <h3>Starting Heirloom Seedlings Indoors</h3>
+        <p>A short guide to the exact seed-starting method Margaret used in 1988.</p>
+        <span class="read-more">Read the Field Note →</span>
+      </a>
+      <a class="blog-card" href="./404.html">
+        <img src="./assets/long table dinner.webp" alt="Farm to table dinner setup">
+        <span class="tag">On the Table</span>
+        <h3>A Farm Dinner, Six Courses, Zero Miles</h3>
+        <p>Recapping our autumn long-table dinner — and the recipes that came out of it.</p>
+        <span class="read-more">Read the Field Note →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter" id="newsletter-section">
+  <div class="wrap">
+    <div class="eyebrow">Stay In Season</div>
+    <h2>Get the harvest list <em>every Sunday</em></h2>
+    <p>One short email a week — what's ripe, what's coming, and first access to seasonal boxes.</p>
+    <form class="news-form" id="newsForm" novalidate>
+      <input type="email" id="newsEmail" placeholder="you@email.com" required>
+      <button type="submit">Subscribe →</button>
+    </form>
+    <span class="field-err" id="newsErr" style="display:block;margin-top:10px;color:var(--marigold-soft);font-size:13px;"></span>
+  </div>
+</section>
+
+<script>
+(function(){
+  const form = document.getElementById('newsForm');
+  const email = document.getElementById('newsEmail');
+  const err = document.getElementById('newsErr');
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const val = email.value.trim();
+    if(!EMAIL_RE.test(val)){
+      err.textContent = 'Enter a valid email address to subscribe.';
+      email.style.borderColor = '#e0847a';
+      return;
+    }
+    err.textContent = '';
+    email.style.borderColor = '';
+    form.reset();
+    try{ sessionStorage.setItem('stacklyScrollTo', 'newsletter-section'); }catch(e2){}
+    setTimeout(function(){ window.location.href = './404.html'; });
+  });
+  // If we're arriving back here after that redirect, return to this section instead of the top
+  function restoreScroll(){
+    try{
+      if(sessionStorage.getItem('stacklyScrollTo') === 'newsletter-section'){
+        sessionStorage.removeItem('stacklyScrollTo');
+        document.getElementById('newsletter-section').scrollIntoView({block:'start'});
+      }
+    }catch(e3){}
+  }
+  window.addEventListener('pageshow', restoreScroll);
+})();
+</script>
+
+
+<section style="padding-top:0;padding-bottom:0;">
+  <div class="wrap">
+    <div class="cert-strip">
+      <div class="cert-item"><div class="circle">USDA<br>NOP</div><span>USDA Certified Organic</span></div>
+      <div class="cert-item"><div class="circle">CNG</div><span>Certified Naturally Grown</span></div>
+      <div class="cert-item"><div class="circle">REG<br>AG</div><span>Regenerative Agriculture Alliance</span></div>
+      <div class="cert-item"><div class="circle">FAIR<br>LBR</div><span>Fair Labor Farm Partner</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="logo"><img src="./stackly-logo.webp" alt="Stackly"><span class="logo-word">Stackly</span></a>
+        <p>Forty acres of certified-organic vegetables, orchard fruit and pastured eggs, farmed by the Stackly family since 1988.</p>
+        <div class="social-links">
+          <a href="./404.html" class="social-icon instagram" title="Instagram" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.057-1.645.069-4.849.069-3.204 0-3.584-.012-4.849-.069-3.259-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1 1 12.324 0 6.162 6.162 0 0 1-12.324 0zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm4.965-10.322a1.44 1.44 0 1 1 2.881.001 1.44 1.44 0 0 1-2.881-.001z"/></svg></a>
+          <a href="./404.html" class="social-icon facebook" title="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="./404.html" class="social-icon x" title="X (Twitter)" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.6l-5.165-6.756-5.905 6.756H2.306l7.644-8.74L1.584 2.25h6.787l4.682 6.191 5.391-6.191zM17.15 18.558h1.82L6.03 3.961H4.126l13.024 14.597z"/></svg></a>
+          <a href="./404.html" class="social-icon youtube" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+          <a href="./404.html" class="social-icon linkedin" title="LinkedIn" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="products.html">Products</a>
+        <a href="blog.html">Journal</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <a href="./404.html">CSA Boxes</a>
+        <a href="./404.html">Farm Stand</a>
+        <a href="./404.html">Wholesale</a>
+        <a href="./404.html">Farm Tours</a>
+      </div>
+      <div class="footer-col">
+        <h4>Info</h4>
+        <ul>
+          <li class="address-line" >Contact Us</li>
+          <li class="address-line">MMR Complex, Periyakollappatty</li>
+          <li class="address-line">Chinna Thirupathi, Salem</li>
+          <li class="address-line">Tamil Nadu 636008</li>
+          <li><a href="./404.html">hello@stacklyfarm.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Stackly Farm. All rights reserved.</span>
+      <span>Certified Organic · USDA NOP 8827</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// nav scroll state
+const nav = document.getElementById('siteNav');
+window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', window.scrollY > 40));
+
+// mobile menu
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+const mobileMenuClose = document.getElementById('mobileMenuClose');
+hamburger.addEventListener('click', ()=>{
+  mobileMenu.classList.toggle('open');
+});
+mobileMenuClose.addEventListener('click', ()=>mobileMenu.classList.remove('open'));
+mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>mobileMenu.classList.remove('open')));
+
+// hero text reveal (line by line, gsap.com-style split reveal)
+document.querySelectorAll('.hero h1 .line span').forEach((el,i)=>{
+  gsap.fromTo(el, {yPercent:120, rotate:4}, {yPercent:0, rotate:0, duration:1.1, ease:'expo.out', delay:.15+i*.12});
+});
+gsap.fromTo('.hero-sub, .hero-actions', {opacity:0, y:24}, {opacity:1, y:0, duration:1, delay:.7, stagger:.12, ease:'power3.out'});
+gsap.fromTo('.hero-frame img', {scale:1.15}, {scale:1, duration:1.8, ease:'power3.out', delay:.3});
+gsap.fromTo('.hero-frame', {clipPath:'inset(100% 0 0 0)'}, {clipPath:'inset(0% 0 0 0)', duration:1.3, ease:'power4.inOut', delay:.15});
+gsap.fromTo('.hero-stamp, .sprout-badge', {opacity:0, scale:.6}, {opacity:1, scale:1, duration:.9, delay:1.1, stagger:.15, ease:'back.out(2)'});
+
+// sprout draw animation
+const sproutPath = document.getElementById('sproutPath');
+const len = sproutPath.getTotalLength();
+sproutPath.style.strokeDasharray = len;
+sproutPath.style.strokeDashoffset = len;
+gsap.to(sproutPath, {strokeDashoffset:0, duration:2, delay:1.3, ease:'power2.inOut'});
+
+// generic scroll reveals
+gsap.utils.toArray('.reveal-up').forEach(el=>{
+  gsap.fromTo(el, {opacity:0, y:60}, {
+    opacity:1, y:0, duration:1, ease:'power3.out',
+    scrollTrigger:{trigger:el, start:'top 88%'}
+  });
+});
+
+// section head reveal
+gsap.utils.toArray('.section-head').forEach(el=>{
+  gsap.fromTo(el.children, {opacity:0, y:40}, {
+    opacity:1, y:0, duration:.9, stagger:.15, ease:'power3.out',
+    scrollTrigger:{trigger:el, start:'top 85%'}
+  });
+});
+
+// produce card mask reveal (gsap.com-style wipe)
+gsap.utils.toArray('.produce-card').forEach((card,i)=>{
+  const mask = card.querySelector('.reveal-mask');
+  const img = card.querySelector('img');
+  gsap.timeline({scrollTrigger:{trigger:card, start:'top 85%'}})
+    .to(mask, {scaleY:0, duration:.9, ease:'power4.inOut', delay:i*.05})
+    .fromTo(img, {scale:1.3}, {scale:1, duration:1.4, ease:'power3.out'}, '-=0.7');
+});
+
+// gallery mask reveal + hover-driven zoom (same wipe motif as produce cards)
+gsap.utils.toArray('.gallery-item').forEach((card,i)=>{
+  const mask = card.querySelector('.reveal-mask');
+  const img = card.querySelector('img');
+  gsap.timeline({scrollTrigger:{trigger:card, start:'top 88%'}})
+    .to(mask, {scaleY:0, duration:.9, ease:'power4.inOut', delay:i*.06})
+    .fromTo(img, {scale:1.4}, {scale:1.25, duration:1.4, ease:'power3.out'}, '-=0.7');
+});
+
+// numbers counters
+gsap.utils.toArray('.numbers-item b').forEach(stat=>{
+  const raw = stat.textContent;
+  const end = parseInt(raw.replace(/,/g,''));
+  const suffix = raw.replace(/[0-9,]/g,'');
+  const obj = {val:0};
+  ScrollTrigger.create({
+    trigger: stat, start:'top 90%', once:true,
+    onEnter: ()=> gsap.to(obj, {val:end, duration:1.8, ease:'power2.out',
+      onUpdate:()=> stat.textContent = Math.floor(obj.val).toLocaleString() + suffix })
+  });
+});
+
+// blog card stagger
+gsap.utils.toArray('.blog-card').forEach((card,i)=>{
+  gsap.fromTo(card, {opacity:0, y:50}, {
+    opacity:1, y:0, duration:.9, delay:i*.1, ease:'power3.out',
+    scrollTrigger:{trigger:'.blog-grid', start:'top 85%'}
+  });
+});
+
+// quote carousel reveal-in on scroll
+gsap.fromTo('#quoteCarousel > *', {opacity:0, y:30}, {
+  opacity:1, y:0, duration:1, stagger:.15, ease:'power3.out',
+  scrollTrigger:{trigger:'#quoteCarousel', start:'top 85%'}
+});
+
+// counters
+gsap.utils.toArray('.stat b').forEach(stat=>{
+  const end = parseInt(stat.textContent);
+  const obj = {val:0};
+  ScrollTrigger.create({
+    trigger: stat, start:'top 90%', once:true,
+    onEnter: ()=> gsap.to(obj, {val:end, duration:1.6, ease:'power2.out', onUpdate:()=> stat.textContent = Math.floor(obj.val) + (stat.textContent.includes('+')?'':'') })
+  });
+});
+
+// story images parallax
+gsap.to('.img-a', {yPercent:-8, ease:'none', scrollTrigger:{trigger:'.story', start:'top bottom', end:'bottom top', scrub:true}});
+gsap.to('.img-b', {yPercent:10, ease:'none', scrollTrigger:{trigger:'.story', start:'top bottom', end:'bottom top', scrub:true}});
+
+// marquee pause on hover
+document.querySelector('.marquee-strip').addEventListener('mouseenter', ()=> document.getElementById('marqueeTrack').style.animationPlayState='paused');
+document.querySelector('.marquee-strip').addEventListener('mouseleave', ()=> document.getElementById('marqueeTrack').style.animationPlayState='running');
+
+/* ---------------------------------------------------------------
+   FIX 2: testimonial carousel logic
+   Auto-advances every 3s. New slide enters from the right, the
+   outgoing slide exits to the left (a continuous right→left swipe).
+   After the exit finishes, the outgoing slide is silently reset to
+   its "waiting on the right" position with transitions disabled for
+   one frame, so it's ready to re-enter next time round.
+--------------------------------------------------------------- */
+(function(){
+  const track = document.querySelector('#quoteCarousel .quote-track');
+  if(!track) return;
+  const slides = Array.from(track.querySelectorAll('.quote-slide'));
+  const dots = Array.from(document.querySelectorAll('#quoteCarousel .quote-dot'));
+  const total = slides.length;
+  let active = 0;
+  const INTERVAL = 3000;
+
+  function goTo(next){
+    if(next === active) return;
+    const prev = active;
+    slides[prev].classList.remove('is-active');
+    slides[prev].classList.add('is-exit');
+    slides[next].classList.remove('is-enter');
+    slides[next].classList.add('is-active');
+    dots.forEach(d=>d.classList.remove('is-active'));
+    dots[next] && dots[next].classList.add('is-active');
+    active = next;
+    setTimeout(()=>{
+      slides[prev].classList.add('is-instant');
+      slides[prev].classList.remove('is-exit');
+      slides[prev].classList.add('is-enter');
+      void slides[prev].offsetWidth; // force reflow before re-enabling transition
+      slides[prev].classList.remove('is-instant');
+    }, 720);
+  }
+
+  let timer = setInterval(()=> goTo((active+1)%total), INTERVAL);
+  function restart(){ clearInterval(timer); timer = setInterval(()=> goTo((active+1)%total), INTERVAL); }
+
+  dots.forEach((dot,i)=> dot.addEventListener('click', ()=>{ goTo(i); restart(); }));
+  const carousel = document.getElementById('quoteCarousel');
+  carousel.addEventListener('mouseenter', ()=> clearInterval(timer));
+  carousel.addEventListener('mouseleave', restart);
+})();
+</script>
+</body>
+</html>
